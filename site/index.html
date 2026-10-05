@@ -93,6 +93,12 @@ a{color:var(--data)}
 .tabs button:hover{color:var(--blue)}
 .tabs .count{font-weight:400;font-size:13px;margin-left:6px;color:var(--muted)}
 .group-intro{margin:0 0 12px;color:var(--muted);font-size:14px;max-width:80ch}
+.cards .subhead{grid-column:1/-1;margin:18px 0 -2px;padding-top:12px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}
+.cards .subhead:first-child{margin-top:0;padding-top:0;border-top:0}
+.cards .subhead h3{font-size:16px;color:var(--blue-deep)}
+.cards .subhead p{margin:0;font-size:13px;color:var(--muted);max-width:80ch}
+.card .bars{width:100%;height:44px;display:block}
+.card .flag{font-size:13px;margin:0;padding:4px 8px;border-left:3px solid #5B7DB1;background:#EEF2F8;color:#2E4A6B}
 .chip.heat{color:#8E2B12;background:#FBE9E3;border-color:#EDB9A8}
 .mix{display:flex;height:14px;width:100%;overflow:hidden;border:1px solid var(--grid)}
 .mix span{display:block;height:100%}
@@ -115,6 +121,9 @@ a{color:var(--data)}
 .key.gdot{border-top:2px dotted #3F8F2A}
 .key.fcast{border-top:2px dashed #0074A6}
 .key.tick{height:6px;border:0;background:#00A58A;width:10px}
+.key.rtick{height:6px;border:0;background:#5B7DB1;width:10px}
+.key.wdot{width:8px;height:8px;border:0;border-radius:50%;background:#0074A6}
+.key.eband{height:10px;border:0;background:#EEF2F8}
 .moon{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text)}
 .moon svg{width:30px;height:30px;flex:none}
 .moon b{color:var(--ink)}
@@ -142,6 +151,7 @@ a{color:var(--data)}
 .tag.upwelling{color:#00665A;background:#DDF4EF;border-color:#9ED9CC}
 .tag.dust{color:#6A4510;background:var(--sand-bg);border-color:#E7C98F}
 .tag.heatwave{color:#8E2B12;background:#FBE9E3;border-color:#EDB9A8}
+.tag.rain{color:#2E4A6B;background:#EEF2F8;border-color:#B8C7DE}
 
 /* chart panel */
 .panel{background:var(--panel);border:1px solid var(--rule);padding:20px}
@@ -442,6 +452,8 @@ details ul{padding-left:18px;margin:8px 0}
         <p>"About normal" means within half a standard deviation of the average. "Slightly" is up to one standard deviation away, "much" is more than two.</p>
         <p>"Combined" uses the best available source for each day: reprocessed satellite data before near-real-time data, and ERA5 before the airport station for weather. Where a measurement has more than one source, the <em>Data source</em> menu shows one source on its own, with its own average and limits.</p>
         <p>The marine heatwave level uses its own method: an 11-day window, the 90th percentile over 1991–2020 (or every year available if the record is shorter), smoothed over 31 days. Heatwaves are worked out from the combined SST series.</p>
+        <p>Rain is ERA5 rainfall for the airport, with the Open-Meteo forecast filling the last few days. The 7- and 30-day totals are compared with the same days in every other year. Heavy rain is a day of 20 mm or more; a first flush is 10 mm or more after 30 days with less than 1 mm a day, when the first proper rain washes a dry catchment into the sea. Both are marked on the chlorophyll, clarity and nutrient charts, and listed as possible bloom triggers.</p>
+        <p>Wind, wave and current directions go round in a circle, so they are charted as one dot per day with the share of easterly and westerly days, not an average and standard deviation.</p>
         <p>For satellite ocean colour (chlorophyll, KD490, plankton groups, CDOM and primary production) each day's value is the median of the cloud-free pixels in the area, so a few bad coastal pixels can't skew it. Values outside a physically possible range are discarded. Chlorophyll is naturally skewed, so its lower band edge is held at zero.</p>
       </div>
     </details>
@@ -459,7 +471,7 @@ details ul{padding-left:18px;margin:8px 0}
 "use strict";
 // Data lives on GitHub Pages. When this page is served from there, use the folder next to it;
 // when it is hosted anywhere else (e.g. the TNP website), read the published data directly.
-const PAGES_DATA = "https://nautilusproject-gib.github.io/tnp-ocean-harvester/data/";
+const PAGES_DATA = "https://the-nautilus-project.github.io/tnp-ocean-harvester/data/";
 const BASE = window.TNP_DATA_BASE || (location.hostname.endsWith("github.io") ? "data/" : PAGES_DATA);
 const SAMPLE = window.TNP_SAMPLE || null;
 
@@ -477,86 +489,128 @@ const GROUPS = [
   ["traffic", "Marine traffic", "Human activity at sea, inferred from the AIS signals ships broadcast. A vessel with AIS switched off, or too small to carry it, does not appear here at all."],
 ];
 const VARS = [
-  // physical
-  {g:"physical", v:"sst", title:"Sea Surface Temperature", short:"SST", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler"},
-  {g:"physical", v:"mhw", special:"mhw", title:"Marine heatwave", loc:"area", chartVar:"sst"},
-  {g:"physical", v:"depth", special:"depth", title:"Below the surface", loc:"area", chartVar:"temp_30m"},
-  {g:"physical", v:"upwell", special:"upwelling", title:"Upwelling", loc:"gibraltar_airport", where:"Alboran coast", chartVar:"upwelling_index"},
-  {g:"physical", v:"tide", special:"tide", title:"Tide", loc:"gibraltar_tide_gauge", where:"Gibraltar", chartVar:"surge"},
-  {g:"physical", v:"par", title:"Light (PAR)", loc:"area", unit:"mol/m²/day", dp:0, up:"Brighter", down:"Duller", floor0:true, sat:true},
-  {g:"physical", v:"seabed", special:"light", title:"Light on the seabed", loc:"area", chartVar:"par_10m"},
-  {g:"physical", v:"kd490", title:"Attenuation Coefficient (KD490)", short:"KD490", loc:"area", unit:"m⁻¹", dp:3, up:"Murkier", down:"Clearer", floor0:true, sat:true},
-  {g:"physical", v:"current_speed", title:"Surface current", loc:"area", unit:"m/s", dp:2, up:"Faster", down:"Slower", floor0:true, model:true},
-  {g:"physical", v:"salinity", title:"Salinity", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true},
-  {g:"physical", v:"mld", title:"Mixed layer depth", loc:"area", unit:"m", dp:0, up:"Deeper mixing", down:"Shallower mixing", floor0:true, model:true},
-  {g:"physical", v:"hf_current_speed", title:"Surface current (measured)", loc:"strait_of_gibraltar", where:"Strait", unit:"m/s", dp:2, up:"Faster", down:"Slower", floor0:true},
-  {g:"physical", v:"sea_level_anomaly", title:"Sea level", loc:"gibraltar_20km", unit:"m", dp:3, up:"Higher", down:"Lower"},
-  {g:"physical", v:"uv_index", title:"UV index", loc:"gibraltar_airport", where:"Gibraltar", unit:"", dp:1, up:"Stronger", down:"Weaker", floor0:true, threshold:8},
-  {g:"physical", v:"wave_hs", title:"Waves", loc:"europa_point", where:"Europa Point", unit:"m", dp:1, up:"Rougher", down:"Calmer", floor0:true},
-  {g:"physical", v:"wind_speed", title:"Wind", loc:"gibraltar_airport", where:"Airport", unit:"m/s", dp:1, up:"Windier", down:"Calmer", floor0:true},
-  {g:"physical", v:"bbp443", title:"Particle backscatter (443 nm)", loc:"area", unit:"m⁻¹", dp:4, up:"More particles", down:"Fewer particles", floor0:true, sat:true, card:false},
-  {g:"physical", v:"air_temp", title:"Air temperature", loc:"gibraltar_airport", where:"Airport", unit:"°C", dp:1, up:"Warmer", down:"Cooler", card:false},
-  {g:"physical", v:"temp_10m", title:"Temperature at 10 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
-  {g:"physical", v:"temp_20m", title:"Temperature at 20 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
-  {g:"physical", v:"temp_30m", title:"Temperature at 30 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
-  {g:"physical", v:"temp_50m", title:"Temperature at 50 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
-  {g:"physical", v:"temp_100m", title:"Temperature at 100 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
-  {g:"physical", v:"salinity_50m", title:"Salinity at 50 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
-  {g:"physical", v:"salinity_100m", title:"Salinity at 100 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
-  {g:"physical", v:"salinity_200m", title:"Salinity at 200 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
-  {g:"physical", v:"interface_depth", title:"Atlantic–Mediterranean interface depth", loc:"area", unit:"m", dp:0, up:"Deeper", down:"Shallower", floor0:true, model:true, card:false},
-  {g:"physical", v:"upwelling_index", title:"Upwelling index", loc:"gibraltar_airport", where:"Alboran coast", unit:"m³/s per km", dp:0, up:"More upwelling", down:"Less upwelling", card:false},
-  {g:"physical", v:"par_5m", title:"Light reaching 5 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
-  {g:"physical", v:"par_10m", title:"Light reaching 10 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
-  {g:"physical", v:"par_15m", title:"Light reaching 15 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
-  {g:"physical", v:"par_20m", title:"Light reaching 20 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
-  {g:"physical", v:"surge", title:"Surge (weather effect on sea level)", loc:"gibraltar_tide_gauge", where:"Gibraltar", unit:"m", dp:2, up:"Higher", down:"Lower", card:false},
-  {g:"physical", v:"sea_level", title:"Sea level against the past year", loc:"gibraltar_tide_gauge", where:"Gibraltar", unit:"m", dp:2, up:"Higher", down:"Lower", card:false},
-  {g:"physical", v:"precip", title:"Rain", loc:"gibraltar_airport", where:"Airport", unit:"mm", dp:1, up:"Wetter", down:"Drier", floor0:true, card:false},
-  // wildlife (NEMO sightings)
+  // physical: sea temperature
+  {g:"physical", sub:"temp", v:"sst", title:"Sea Surface Temperature", short:"SST", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler"},
+  {g:"physical", sub:"temp", v:"mhw", special:"mhw", title:"Marine heatwave", loc:"area", chartVar:"sst"},
+  {g:"physical", sub:"temp", v:"depth", special:"depth", title:"Below the surface", loc:"area", chartVar:"temp_30m"},
+  {g:"physical", sub:"temp", v:"temp_10m", title:"Temperature at 10 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
+  {g:"physical", sub:"temp", v:"temp_20m", title:"Temperature at 20 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
+  {g:"physical", sub:"temp", v:"temp_30m", title:"Temperature at 30 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
+  {g:"physical", sub:"temp", v:"temp_50m", title:"Temperature at 50 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
+  {g:"physical", sub:"temp", v:"temp_100m", title:"Temperature at 100 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
+  // physical: light and clarity
+  {g:"physical", sub:"light", v:"par", title:"Light (PAR)", loc:"area", unit:"mol/m²/day", dp:0, up:"Brighter", down:"Duller", floor0:true, sat:true},
+  {g:"physical", sub:"light", v:"seabed", special:"light", title:"Light on the seabed", loc:"area", chartVar:"par_10m"},
+  {g:"physical", sub:"light", v:"kd490", title:"Attenuation Coefficient (KD490)", short:"KD490", loc:"area", unit:"m⁻¹", dp:3, up:"Murkier", down:"Clearer", floor0:true, sat:true},
+  {g:"physical", sub:"light", v:"uv_index", title:"UV index", loc:"gibraltar_airport", where:"Gibraltar", unit:"", dp:1, up:"Stronger", down:"Weaker", floor0:true, threshold:8},
+  {g:"physical", sub:"light", v:"bbp443", title:"Particle backscatter (443 nm)", loc:"area", unit:"m⁻¹", dp:4, up:"More particles", down:"Fewer particles", floor0:true, sat:true, card:false},
+  {g:"physical", sub:"light", v:"par_5m", title:"Light reaching 5 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
+  {g:"physical", sub:"light", v:"par_10m", title:"Light reaching 10 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
+  {g:"physical", sub:"light", v:"par_15m", title:"Light reaching 15 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
+  {g:"physical", sub:"light", v:"par_20m", title:"Light reaching 20 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
+  // physical: currents and water masses
+  {g:"physical", sub:"water", v:"current_speed", title:"Surface current", loc:"area", unit:"m/s", dp:2, up:"Faster", down:"Slower", floor0:true, model:true},
+  {g:"physical", sub:"water", v:"hf_current_speed", title:"Surface current (measured)", loc:"strait_of_gibraltar", where:"Strait", unit:"m/s", dp:2, up:"Faster", down:"Slower", floor0:true},
+  {g:"physical", sub:"water", v:"hf_current_dir", title:"Surface current direction (measured, towards)", loc:"strait_of_gibraltar", where:"Strait", unit:"°", dp:0, dir:true, card:false},
+  {g:"physical", sub:"water", v:"salinity", title:"Salinity", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true},
+  {g:"physical", sub:"water", v:"mld", title:"Mixed layer depth", loc:"area", unit:"m", dp:0, up:"Deeper mixing", down:"Shallower mixing", floor0:true, model:true},
+  {g:"physical", sub:"water", v:"upwell", special:"upwelling", title:"Upwelling", loc:"gibraltar_airport", where:"Alboran coast", chartVar:"upwelling_index"},
+  {g:"physical", sub:"water", v:"upwelling_index", title:"Upwelling index", loc:"gibraltar_airport", where:"Alboran coast", unit:"m³/s per km", dp:0, up:"More upwelling", down:"Less upwelling", card:false},
+  {g:"physical", sub:"water", v:"salinity_50m", title:"Salinity at 50 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
+  {g:"physical", sub:"water", v:"salinity_100m", title:"Salinity at 100 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
+  {g:"physical", sub:"water", v:"salinity_200m", title:"Salinity at 200 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
+  {g:"physical", sub:"water", v:"interface_depth", title:"Atlantic–Mediterranean interface depth", loc:"area", unit:"m", dp:0, up:"Deeper", down:"Shallower", floor0:true, model:true, card:false},
+  // physical: waves, tide and sea level
+  {g:"physical", sub:"sea", v:"wave_hs", title:"Waves", loc:"europa_point", where:"Europa Point", unit:"m", dp:1, up:"Rougher", down:"Calmer", floor0:true},
+  {g:"physical", sub:"sea", v:"wave_tp", title:"Wave period", loc:"europa_point", where:"Europa Point", unit:"s", dp:1, up:"Longer", down:"Shorter", floor0:true},
+  {g:"physical", sub:"sea", v:"wave_dir", title:"Wave direction (from)", loc:"europa_point", where:"Europa Point", unit:"°", dp:0, dir:true, card:false},
+  {g:"physical", sub:"sea", v:"tide", special:"tide", title:"Tide", loc:"gibraltar_tide_gauge", where:"Gibraltar", chartVar:"surge"},
+  {g:"physical", sub:"sea", v:"sea_level_anomaly", title:"Sea level", loc:"gibraltar_20km", where:"20 km box", unit:"m", dp:3, up:"Higher", down:"Lower"},
+  {g:"physical", sub:"sea", v:"surge", title:"Surge (weather effect on sea level)", loc:"gibraltar_tide_gauge", where:"Gibraltar", unit:"m", dp:2, up:"Higher", down:"Lower", card:false},
+  {g:"physical", sub:"sea", v:"sea_level", title:"Sea level against the past year", loc:"gibraltar_tide_gauge", where:"Gibraltar", unit:"m", dp:2, up:"Higher", down:"Lower", card:false},
+  // physical: weather and rain
+  {g:"physical", sub:"weather", v:"rain", special:"rain", title:"Rain", loc:"gibraltar_airport", where:"Airport", chartVar:"precip_30d", chartFallback:"precip"},
+  {g:"physical", sub:"weather", v:"wind_speed", title:"Wind", loc:"gibraltar_airport", where:"Airport", unit:"m/s", dp:1, up:"Windier", down:"Calmer", floor0:true},
+  {g:"physical", sub:"weather", v:"wind_gust", title:"Wind gusts", loc:"gibraltar_airport", where:"Airport", unit:"m/s", dp:1, up:"Gustier", down:"Less gusty", floor0:true},
+  {g:"physical", sub:"weather", v:"slp", title:"Air pressure", loc:"gibraltar_airport", where:"Airport", unit:"hPa", dp:0, up:"Higher", down:"Lower"},
+  {g:"physical", sub:"weather", v:"wind_dir", title:"Wind direction (from)", loc:"gibraltar_airport", where:"Airport", unit:"°", dp:0, dir:true, card:false},
+  {g:"physical", sub:"weather", v:"precip", title:"Rain each day", loc:"gibraltar_airport", where:"Airport", unit:"mm", dp:1, up:"Wetter", down:"Drier", floor0:true, card:false},
+  {g:"physical", sub:"weather", v:"precip_7d", title:"Rain over 7 days", loc:"gibraltar_airport", where:"Airport", unit:"mm", dp:0, up:"Wetter", down:"Drier", floor0:true, card:false},
+  {g:"physical", sub:"weather", v:"precip_30d", title:"Rain over 30 days", loc:"gibraltar_airport", where:"Airport", unit:"mm", dp:0, up:"Wetter", down:"Drier", floor0:true, card:false},
+  {g:"physical", sub:"weather", v:"air_temp", title:"Air temperature", loc:"gibraltar_airport", where:"Airport", unit:"°C", dp:1, up:"Warmer", down:"Cooler", card:false},
+  // marine traffic
   {g:"traffic", v:"fishing_hours", title:"Fishing activity", loc:"strait_of_gibraltar", where:"Strait", unit:"hours/day", dp:1, up:"More fishing", down:"Less fishing", floor0:true},
   {g:"traffic", v:"fishing_flags", title:"Countries fishing", loc:"strait_of_gibraltar", where:"Strait", unit:"", dp:0, up:"More fleets", down:"Fewer fleets", floor0:true},
+  // wildlife (NEMO sightings)
   {g:"wildlife", v:"wsight", special:"sightings", title:"Sightings", loc:"area"},
   {g:"wildlife", v:"wwatch", special:"watch", title:"Sea sparkle watch", loc:"area"},
   {g:"wildlife", v:"wgel", special:"gelatinous", title:"Jellyfish and gelatinous", loc:"area"},
   {g:"wildlife", v:"winv", special:"invasive", title:"Invasive watch", loc:"area"},
   {g:"wildlife", v:"wstrand", special:"strandings", title:"Strandings reported", loc:"area"},
-  // chemical
-  {g:"chemical", v:"dust_sfc", title:"Saharan dust", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"Dustier", down:"Less dust", floor0:true, threshold:50},
-  {g:"chemical", v:"pm10", title:"PM10 in the air", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"More particles", down:"Cleaner", floor0:true, threshold:45},
-  {g:"chemical", v:"pm2_5", title:"PM2.5 in the air", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:1, up:"More particles", down:"Cleaner", floor0:true, threshold:25, card:false},
-  {g:"chemical", v:"no2", title:"Nitrogen dioxide", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"More", down:"Less", floor0:true, card:false},
-  {g:"chemical", v:"ozone", title:"Ozone", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"More", down:"Less", floor0:true, card:false},
-  {g:"chemical", v:"nitrate", title:"Nitrate", loc:"area", unit:"mmol/m³", dp:2, up:"More nitrate", down:"Less nitrate", floor0:true, model:true},
-  {g:"chemical", v:"phosphate", title:"Phosphate", loc:"area", unit:"mmol/m³", dp:3, up:"More phosphate", down:"Less phosphate", floor0:true, model:true},
-  {g:"chemical", v:"oxygen", title:"Dissolved oxygen", loc:"area", unit:"mmol/m³", dp:0, up:"More oxygen", down:"Less oxygen", model:true},
-  {g:"chemical", v:"ph", title:"pH", loc:"area", unit:"", dp:3, up:"Less acidic", down:"More acidic", model:true},
-  {g:"chemical", v:"pco2", title:"Surface pCO₂", loc:"area", unit:"µatm", dp:0, up:"Higher", down:"Lower", model:true},
-  {g:"chemical", v:"cdom_adg443", title:"Dissolved organic matter (CDOM)", loc:"area", unit:"m⁻¹", dp:3, up:"More", down:"Less", floor0:true, sat:true},
-  {g:"chemical", v:"ammonium", title:"Ammonium", loc:"area", unit:"mmol/m³", dp:2, up:"More ammonium", down:"Less ammonium", floor0:true, model:true, card:false},
-  {g:"chemical", v:"dic", title:"Dissolved inorganic carbon", loc:"area", unit:"mmol/m³", dp:0, up:"Higher", down:"Lower", model:true, card:false},
-  {g:"chemical", v:"alkalinity", title:"Total alkalinity", loc:"area", unit:"mmol/m³", dp:0, up:"Higher", down:"Lower", model:true, card:false},
-  {g:"chemical", v:"aod_550", title:"Aerosol optical depth", loc:"gibraltar_airport", where:"Gibraltar", unit:"", dp:2, up:"Hazier", down:"Clearer", floor0:true, card:false},
-  // biological
-  {g:"biological", v:"chl", title:"Chlorophyll", loc:"area", unit:"mg/m³", dp:2, up:"More plankton", down:"Less plankton", floor0:true, sat:true},
-  {g:"biological", v:"bloom", special:"bloom", title:"Bloom watch", loc:"area", chartVar:"chl"},
-  {g:"biological", v:"bwatch", special:"watch", title:"Sea sparkle", loc:"area", card:true},
-  {g:"biological", v:"sizes", special:"sizes", title:"Plankton size mix", loc:"area", chartVar:"pico_phyto"},
-  {g:"biological", v:"pp_sat", title:"Primary production", loc:"area", unit:"g C/m²/day", dp:2, up:"More growth", down:"Less growth", floor0:true, sat:true},
-  {g:"biological", v:"diatoms", title:"Diatoms", loc:"area", unit:"mg/m³", dp:3, up:"More diatoms", down:"Fewer diatoms", floor0:true, sat:true},
-  {g:"biological", v:"dinoflagellates", title:"Dinoflagellates", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true},
-  {g:"biological", v:"phyto_carbon", title:"Phytoplankton carbon", loc:"area", unit:"mmol C/m³", dp:2, up:"More", down:"Less", floor0:true, model:true},
-  {g:"biological", v:"micro_phyto", title:"Microphytoplankton (>20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
-  {g:"biological", v:"nano_phyto", title:"Nanophytoplankton (2–20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
-  {g:"biological", v:"pico_phyto", title:"Picophytoplankton (<2 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
-  {g:"biological", v:"haptophytes", title:"Haptophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
-  {g:"biological", v:"cryptophytes", title:"Cryptophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
-  {g:"biological", v:"green_algae", title:"Green algae and prochlorophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
-  {g:"biological", v:"prokaryotes", title:"Prokaryotes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
-  {g:"biological", v:"npp_model", title:"Net primary production (model)", loc:"area", unit:"mg C/m³/day", dp:1, up:"More growth", down:"Less growth", floor0:true, model:true, card:false},
-  {g:"biological", v:"zoo_carbon", title:"Zooplankton carbon (model)", loc:"area", unit:"mmol C/m³", dp:2, up:"More", down:"Less", floor0:true, model:true, card:false},
+  // chemical: nutrients
+  {g:"chemical", sub:"nutrients", v:"nitrate", title:"Nitrate", loc:"area", unit:"mmol/m³", dp:2, up:"More nitrate", down:"Less nitrate", floor0:true, model:true},
+  {g:"chemical", sub:"nutrients", v:"phosphate", title:"Phosphate", loc:"area", unit:"mmol/m³", dp:3, up:"More phosphate", down:"Less phosphate", floor0:true, model:true},
+  {g:"chemical", sub:"nutrients", v:"ammonium", title:"Ammonium", loc:"area", unit:"mmol/m³", dp:2, up:"More ammonium", down:"Less ammonium", floor0:true, model:true, card:false},
+  // chemical: oxygen and the carbonate system
+  {g:"chemical", sub:"carbon", v:"oxygen", title:"Dissolved oxygen", loc:"area", unit:"mmol/m³", dp:0, up:"More oxygen", down:"Less oxygen", model:true},
+  {g:"chemical", sub:"carbon", v:"ph", title:"pH", loc:"area", unit:"", dp:3, up:"Less acidic", down:"More acidic", model:true},
+  {g:"chemical", sub:"carbon", v:"pco2", title:"Surface pCO₂", loc:"area", unit:"µatm", dp:0, up:"Higher", down:"Lower", model:true},
+  {g:"chemical", sub:"carbon", v:"dic", title:"Dissolved inorganic carbon", loc:"area", unit:"mmol/m³", dp:0, up:"Higher", down:"Lower", model:true, card:false},
+  {g:"chemical", sub:"carbon", v:"alkalinity", title:"Total alkalinity", loc:"area", unit:"mmol/m³", dp:0, up:"Higher", down:"Lower", model:true, card:false},
+  // chemical: dissolved organic matter
+  {g:"chemical", sub:"organic", v:"cdom_adg443", title:"Dissolved organic matter (CDOM)", loc:"area", unit:"m⁻¹", dp:3, up:"More", down:"Less", floor0:true, sat:true},
+  // chemical: Saharan dust and air quality
+  {g:"chemical", sub:"air", v:"dust_sfc", title:"Saharan dust", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"Dustier", down:"Less dust", floor0:true, threshold:50},
+  {g:"chemical", sub:"air", v:"pm10", title:"PM10 in the air", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"More particles", down:"Cleaner", floor0:true, threshold:45},
+  {g:"chemical", sub:"air", v:"pm2_5", title:"PM2.5 in the air", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:1, up:"More particles", down:"Cleaner", floor0:true, threshold:25, card:false},
+  {g:"chemical", sub:"air", v:"no2", title:"Nitrogen dioxide", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"More", down:"Less", floor0:true, card:false},
+  {g:"chemical", sub:"air", v:"ozone", title:"Ozone", loc:"gibraltar_airport", where:"Gibraltar", unit:"µg/m³", dp:0, up:"More", down:"Less", floor0:true, card:false},
+  {g:"chemical", sub:"air", v:"aod_550", title:"Aerosol optical depth", loc:"gibraltar_airport", where:"Gibraltar", unit:"", dp:2, up:"Hazier", down:"Clearer", floor0:true, card:false},
+  // biological: how much plankton, and how fast it grows
+  {g:"biological", sub:"amount", v:"chl", title:"Chlorophyll", loc:"area", unit:"mg/m³", dp:2, up:"More plankton", down:"Less plankton", floor0:true, sat:true},
+  {g:"biological", sub:"amount", v:"bloom", special:"bloom", title:"Bloom watch", loc:"area", chartVar:"chl"},
+  {g:"biological", sub:"amount", v:"pp_sat", title:"Primary production", loc:"area", unit:"g C/m²/day", dp:2, up:"More growth", down:"Less growth", floor0:true, sat:true},
+  {g:"biological", sub:"amount", v:"phyto_carbon", title:"Phytoplankton carbon", loc:"area", unit:"mmol C/m³", dp:2, up:"More", down:"Less", floor0:true, model:true},
+  {g:"biological", sub:"amount", v:"npp_model", title:"Net primary production (model)", loc:"area", unit:"mg C/m³/day", dp:1, up:"More growth", down:"Less growth", floor0:true, model:true, card:false},
+  // biological: who is in the plankton
+  {g:"biological", sub:"community", v:"sizes", special:"sizes", title:"Plankton size mix", loc:"area", chartVar:"pico_phyto"},
+  {g:"biological", sub:"community", v:"diatoms", title:"Diatoms", loc:"area", unit:"mg/m³", dp:3, up:"More diatoms", down:"Fewer diatoms", floor0:true, sat:true},
+  {g:"biological", sub:"community", v:"dinoflagellates", title:"Dinoflagellates", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true},
+  {g:"biological", sub:"community", v:"micro_phyto", title:"Microphytoplankton (>20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"nano_phyto", title:"Nanophytoplankton (2–20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"pico_phyto", title:"Picophytoplankton (<2 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"haptophytes", title:"Haptophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"cryptophytes", title:"Cryptophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"green_algae", title:"Green algae and prochlorophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"prokaryotes", title:"Prokaryotes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
+  // biological: grazers and sea sparkle
+  {g:"biological", sub:"grazers", v:"bwatch", special:"watch", title:"Sea sparkle", loc:"area", card:true},
+  {g:"biological", sub:"grazers", v:"zoo_carbon", title:"Zooplankton carbon (model)", loc:"area", unit:"mmol C/m³", dp:2, up:"More", down:"Less", floor0:true, model:true, card:false},
 ];
 const CHART_VARS = VARS.filter(c => !c.special);
+// Sub-sections within a tab, so measurements that go together sit together on the cards and in the
+// chart menu. A tab with no entry here is shown as one block.
+const SUBGROUPS = {
+  physical: [
+    ["temp", "Sea temperature", "At the surface from satellite, and down to 100 m from the model."],
+    ["light", "Light and water clarity", "How much sunlight there is and how far it gets into the water."],
+    ["water", "Currents and water masses", "Atlantic water flowing in over the Mediterranean, how well mixed it is, and upwelling on the Spanish coast."],
+    ["sea", "Waves, tide and sea level", "Sea state at Europa Point, the tide at the harbour gauge and longer-term sea level."],
+    ["weather", "Weather and rain", "Wind drives the waves and upwelling. Rain washes nutrients and sediment off the land, which can feed plankton blooms."],
+  ],
+  chemical: [
+    ["nutrients", "Nutrients", "What phytoplankton need to grow."],
+    ["carbon", "Oxygen and the carbonate system", "Dissolved oxygen, and the chemistry behind ocean acidification."],
+    ["organic", "Dissolved organic matter", "Coloured material from run-off and decaying plankton, seen from satellite."],
+    ["air", "Saharan dust and air quality", "Dust brings iron and other nutrients to the sea surface."],
+  ],
+  biological: [
+    ["amount", "How much plankton", "Chlorophyll, blooms and how fast the plankton is growing."],
+    ["community", "Who is in the plankton", "Which groups and sizes of phytoplankton dominate."],
+    ["grazers", "Grazers and sea sparkle", "Animals and plankton that feed on the phytoplankton."],
+  ],
+};
+const subsOf = g => SUBGROUPS[g] || [];
 const groupOf = v => (VARS.find(c => c.v === v) || {}).g || "physical";
 const DUST_THRESHOLD = 50;
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -599,7 +653,7 @@ function cardFromSeries(series){
   const mean = c && c.mean[i] != null ? c.mean[i] : null, sd = c && c.sd[i] != null ? c.sd[i] : null;
   return {date:last[0], value:last[1], clim_mean:mean, clim_sd:sd, z: mean != null && sd ? (last[1]-mean)/sd : null};
 }
-let meta = null, latest = [], dust = null, mhw = null, upwelling = null, blooms = null, tides = null, wildlife = null;
+let meta = null, latest = [], dust = null, mhw = null, upwelling = null, blooms = null, tides = null, wildlife = null, rain = null;
 
 function locFor(cfg){ return cfg.loc === "area" ? state.area : cfg.loc; }
 function areaName(code, short){ const a = AREAS.find(a => a[0] === code); return a ? a[short ? 2 : 1] : code; }
@@ -690,11 +744,16 @@ function fillVariableMenu(){
   // need scrolling, and it let you sit on the Chemical tab looking at a chart of salinity.
   const vs = $("var-select"), mine = groupVars(state.group);
   const name = (GROUPS.find(g => g[0] === state.group) || [])[1] || "";
-  vs.innerHTML = mine.length
-    ? `<optgroup label="${esc(name)}">` + mine.map(c =>
-        `<option value="${c.v}">${esc(c.title)}${c.model ? " (model)" : ""}</option>`).join("")
-      + `</optgroup>`
-    : "";
+  const opt = c => `<option value="${c.v}">${esc(c.title)}${c.model ? " (model)" : ""}</option>`;
+  const subs = subsOf(state.group);
+  vs.innerHTML = !mine.length ? ""
+    : subs.length
+      ? subs.map(([code, label]) => {
+          const inSub = mine.filter(c => c.sub === code);
+          return inSub.length ? `<optgroup label="${esc(label)}">${inSub.map(opt).join("")}</optgroup>` : "";
+        }).join("") + (mine.some(c => !subs.some(s => s[0] === c.sub))
+          ? `<optgroup label="Other">${mine.filter(c => !subs.some(s => s[0] === c.sub)).map(opt).join("")}</optgroup>` : "")
+      : `<optgroup label="${esc(name)}">${mine.map(opt).join("")}</optgroup>`;
   // Changing tab with a variable the new tab does not have would leave the menu and the chart
   // disagreeing, so fall back to the first measurement in the group.
   if (mine.length && !mine.some(c => c.v === state.variable)){
@@ -741,6 +800,7 @@ async function renderCards(){
     if (cfg.special === "gelatinous") return gelatinousCard(cfg);
     if (cfg.special === "invasive") return invasiveCard(cfg);
     if (cfg.special === "strandings") return strandingsCard(cfg);
+    if (cfg.special === "rain") return rainCard(cfg);
     const loc = locFor(cfg);
     let got = null;
     try { got = await getSeries(cfg, loc); } catch(e){}
@@ -755,6 +815,16 @@ async function renderCards(){
     if (cfg.v === "kd490" && l.value > 0) context += `<br>1% of blue light reaches about ${fmt(4.6 / l.value, 0)} m`;
     if (cfg.v === "wind_speed"){ const wd = latestFor("wind_dir", loc); if (wd) context = `${windName(wd.value)} · ` + context; }
     if (cfg.v === "current_speed"){ const cd = latestFor("current_dir", loc); if (cd && cd.value != null) context = `Flowing ${compass(cd.value)} · ` + context; }
+    if (cfg.v === "wave_hs"){ const wd = latestFor("wave_dir", loc); if (wd && wd.value != null) context = `Coming from the ${compass(wd.value)} · ` + context; }
+    if (cfg.v === "wind_gust") context = `About ${fmt(l.value * 3.6, 0)} km/h${l.value >= 17.2 ? " (gale force)" : ""} · ` + context;
+    if (cfg.v === "slp"){
+      const rows = got.series.data, n = rows.length;
+      if (n > 1 && (Date.parse(rows[n-1][0]) - Date.parse(rows[n-2][0])) === 864e5)
+        context = `${signed(rows[n-1][1] - rows[n-2][1], 0)} hPa on the day before · ` + context;
+      // the inverse barometer: the sea stands about 1 cm higher for every hPa of lower pressure
+      if (l.clim_mean != null && l.value - l.clim_mean <= -5)
+        context += `<br>Low pressure is lifting the sea by about ${fmt(l.clim_mean - l.value, 0)} cm`;
+    }
     const spark = sparkline(got.series, cfg) + await forecastStrip(cfg, loc);
     const srcNote = got.choice ? ` · ${esc(got.choice.label)}` : "";
     return `<button type="button" class="card" data-var="${cfg.v}" aria-current="${state.variable===cfg.v}">
@@ -766,7 +836,20 @@ async function renderCards(){
       <div class="foot"><span>${fmtDate(l.date)}${srcNote}</span><span>Last 60 days</span></div>
     </button>`;
   }));
-  box.innerHTML = html.join("");
+  // headings for each sub-section, so related measurements read as one block
+  const subs = subsOf(state.group);
+  if (subs.length){
+    const out = []; let prev = null;
+    list.forEach((cfg, i) => {
+      if (cfg.sub !== prev){
+        const s = subs.find(x => x[0] === cfg.sub);
+        if (s) out.push(`<div class="subhead"><h3 id="sub-${s[0]}">${esc(s[1])}</h3><p>${esc(s[2])}</p></div>`);
+        prev = cfg.sub;
+      }
+      out.push(html[i]);
+    });
+    box.innerHTML = out.join("");
+  } else box.innerHTML = html.join("");
   // A card with no chart behind it (the Wildlife counts) is not actionable unless it jumps.
   const chartHere = (SECTION_TABS["chart-section"] || []).includes(state.group);
   box.querySelectorAll(".card").forEach(c => {
@@ -782,7 +865,9 @@ async function renderCards(){
       jump.querySelector("h2, h3")?.focus?.();
       return;
     }
-    state.variable = (cfg && cfg.chartVar) || c.dataset.var; store.set("variable", state.variable);
+    let want = (cfg && cfg.chartVar) || c.dataset.var;
+    if (cfg && cfg.chartFallback && meta && meta.series && !meta.series.includes(`${want}__${locFor(cfg)}`)) want = cfg.chartFallback;
+    state.variable = want; store.set("variable", state.variable);
     box.querySelectorAll(".card").forEach(x => x.setAttribute("aria-current", String(x === c)));
     $("var-select").value = state.variable;
     renderChart();
@@ -1017,7 +1102,7 @@ async function lightCard(cfg){
   </button>`;
 }
 function triggerTags(ev){
-  const names = {upwelling:"after upwelling", dust:"after Saharan dust", heatwave:"during/after heatwave"};
+  const names = {upwelling:"after upwelling", dust:"after Saharan dust", heatwave:"during/after heatwave", rain:"after heavy rain"};
   return (ev.triggers || []).filter((t, i, a) => a.findIndex(x => x.type === t.type) === i).map(t => `<span class="tag ${t.type}">${names[t.type] || t.type}</span>`).join("");
 }
 function bloomCard(cfg){
@@ -1274,14 +1359,140 @@ function sparkline(series, cfg){
   </svg>`;
 }
 
+/* ---------------- rain ---------------- */
+// Rain matters here for what it washes off the land: sediment and nutrients that cloud the water and
+// can feed a plankton bloom. One day's rain says little, so the card leads with the last 7 days and
+// compares the total with the same 7 days in every other year.
+const RAIN_DEFAULTS = {wet_mm:1, heavy_mm:20, flush_mm:10, dry_days:30};
+const isoDay = t => new Date(t).toISOString().slice(0,10);
+function rainTotals(byDay, endIso, n){
+  let sum = 0;
+  for (let k = 0; k < n; k++){
+    const v = byDay.get(isoDay(Date.parse(endIso + "T00:00:00Z") - k * 864e5));
+    if (v == null) return null;
+    sum += v;
+  }
+  return sum;
+}
+function sameDayIn(year, iso){
+  const md = iso.slice(5) === "02-29" ? "02-28" : iso.slice(5);
+  return `${year}-${md}`;
+}
+function rainNormals(byDay, endIso, n){
+  const years = [...new Set([...byDay.keys()].map(d => +d.slice(0,4)))].filter(y => y !== +endIso.slice(0,4));
+  return years.map(y => rainTotals(byDay, sameDayIn(y, endIso), n)).filter(v => v != null);
+}
+function rainChip(total, normals){
+  if (total == null || normals.length < 3) return {cls:"normal", icon:"●", text:"No comparison yet"};
+  const sorted = normals.slice().sort((a,b) => a-b);
+  const median = sorted[Math.floor(sorted.length/2)];
+  if (total < 0.5 && median < 0.5) return {cls:"normal", icon:"●", text:"Dry, as usual for the time of year"};
+  const below = normals.filter(v => v < total).length, same = normals.filter(v => v === total).length;
+  const p = (below + same / 2) / normals.length;
+  if (p >= 0.9) return {cls:"up", icon:"▲", text:"Much wetter than usual"};
+  if (p >= 0.75) return {cls:"up", icon:"▲", text:"Wetter than usual"};
+  if (p <= 0.1 && total < median) return {cls:"down", icon:"▼", text:"Much drier than usual"};
+  if (p <= 0.25 && total < median) return {cls:"down", icon:"▼", text:"Drier than usual"};
+  return {cls:"normal", icon:"●", text:"About normal for the time of year"};
+}
+// wet spells ending in the last `recent` days that count as heavy rain or a first flush
+function recentRunoff(byDay, lastIso, th, recent = 10, lookback = 150){
+  const t1 = Date.parse(lastIso + "T00:00:00Z");
+  const vals = [];
+  for (let k = lookback; k >= 0; k--){ const d = isoDay(t1 - k * 864e5); vals.push([d, byDay.get(d)]); }
+  const out = []; let dry = 0, i = 0;
+  while (i < vals.length){
+    const v = vals[i][1];
+    if (v == null){ dry = 0; i++; continue; }
+    if (v < th.wet_mm){ dry++; i++; continue; }
+    let j = i, total = 0, peak = 0, peakDay = vals[i][0];
+    while (j < vals.length && vals[j][1] != null && vals[j][1] >= th.wet_mm){
+      total += vals[j][1]; if (vals[j][1] > peak){ peak = vals[j][1]; peakDay = vals[j][0]; } j++;
+    }
+    const end = vals[j-1][0];
+    const heavy = peak >= th.heavy_mm, flush = total >= th.flush_mm && dry >= th.dry_days;
+    if ((heavy || flush) && (t1 - Date.parse(end + "T00:00:00Z")) < recent * 864e5)
+      out.push({start: vals[i][0], end, total, peak, peakDay, heavy, flush, dry});
+    dry = 0; i = j;
+  }
+  return out;
+}
+function rainBars(rows, lastIso){
+  const t1 = Date.parse(lastIso + "T00:00:00Z"), t0 = t1 - 59 * 864e5;
+  const pts = rows.filter(r => Date.parse(r[0] + "T00:00:00Z") >= t0);
+  if (!pts.length) return "";
+  const W = 240, H = 44, P = 2, bw = (W - 2*P) / 60;
+  const hi = Math.max(5, ...pts.map(r => r[1]));
+  const bars = pts.map(r => {
+    const i = Math.round((Date.parse(r[0] + "T00:00:00Z") - t0) / 864e5);
+    const h = r[1] <= 0 ? 0 : Math.max(1, r[1] / hi * (H - 2*P));
+    return h ? `<rect x="${(P + i * bw + 0.3).toFixed(1)}" y="${(H - P - h).toFixed(1)}" width="${Math.max(1, bw - 0.6).toFixed(1)}" height="${h.toFixed(1)}" fill="#0074A6"/>` : "";
+  }).join("");
+  return `<svg class="bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+    <line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="#C5D6DD" stroke-width="1" vector-effect="non-scaling-stroke"/>${bars}</svg>`;
+}
+async function rainCard(cfg){
+  const loc = cfg.loc, where = cfg.where;
+  let got = null;
+  try { got = await getSeries({v:"precip"}, loc); } catch(e){}
+  if (!got || !got.series.data.length) return emptyCard(cfg, where, "Appears once the daily rainfall has been harvested.");
+  const rows = got.series.data;
+  const byDay = new Map(rows.map(r => [r[0], r[1]]));
+  const last = rows[rows.length-1][0];
+  const th = Object.assign({}, RAIN_DEFAULTS, rain || {});
+  const t7 = rainTotals(byDay, last, 7), t30 = rainTotals(byDay, last, 30);
+  const n7 = rainNormals(byDay, last, 7), n30 = rainNormals(byDay, last, 30);
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const d = rainChip(t7, n7);
+  const dp = v => v != null && v < 10 ? 1 : 0;
+  const lines = [];
+  if (t30 != null) lines.push(`Last 30 days: <b>${fmt(t30, dp(t30))} mm</b>${n30.length >= 3 ? ` (average ${fmt(avg(n30), 0)} mm)` : ""}`);
+  // how long since it last rained properly
+  let since = 0, lastWet = null;
+  for (let t = Date.parse(last + "T00:00:00Z"); ; t -= 864e5){
+    const v = byDay.get(isoDay(t));
+    if (v == null) break;
+    if (v >= th.wet_mm){ lastWet = isoDay(t); break; }
+    since++;
+  }
+  if (lastWet === last) lines.push(`${fmt(byDay.get(last), 1)} mm on the latest day`);
+  else if (lastWet) lines.push(`Last rain of ${fmt(th.wet_mm, 0)} mm or more: ${fmtShort(lastWet)} (${since} dry day${since === 1 ? "" : "s"})`);
+  else if (since) lines.push(`No rain of ${fmt(th.wet_mm, 0)} mm or more for at least ${since} days`);
+  const fc = await getForecast("precip", loc);
+  if (fc && fc.data.length >= 3){
+    const next = fc.data.slice(0, 7), sum = next.reduce((a, r) => a + r[1], 0);
+    lines.push(`Forecast for the next ${next.length} days: ${fmt(sum, dp(sum))} mm`);
+  }
+  const runoff = recentRunoff(byDay, last, th).pop();
+  let flag = "";
+  if (runoff){
+    flag = runoff.flush
+      ? `<p class="flag">First proper rain after ${runoff.dry} dry days (${fmt(runoff.total, 0)} mm from ${fmtShort(runoff.start)}). First-flush run-off is likely to carry nutrients and sediment into coastal water: watch chlorophyll and KD490 over the next week or two.</p>`
+      : `<p class="flag">Heavy rain: ${fmt(runoff.peak, 0)} mm on ${fmtShort(runoff.peakDay)}. Expect run-off into coastal water: watch chlorophyll and KD490 over the next week or two.</p>`;
+  }
+  const srcNote = got.choice ? ` · ${esc(got.choice.label)}` : "";
+  return `<button type="button" class="card" data-var="${cfg.v}" aria-current="${state.variable === cfg.chartVar}">
+    <div class="label"><span>${cfg.title}</span><span class="where">${esc(where)}</span></div>
+    <div class="value num">${t7 == null ? "–" : fmt(t7, dp(t7))}<span class="unit">mm in 7 days</span></div>
+    <span class="chip ${d.cls}"><span aria-hidden="true">${d.icon}</span>${d.text}</span>
+    <p class="context num">${lines.join("<br>")}</p>
+    ${flag}
+    ${rainBars(rows, last)}
+    <div class="foot"><span>${fmtDate(last)}${srcNote}</span><span>Daily rain, last 60 days</span></div>
+  </button>`;
+}
+
 /* ---------------- chart ---------------- */
 const MHW_FILES = {sst:"marine_heatwaves.json", temp_10m:"marine_heatwaves__temp_10m.json", temp_30m:"marine_heatwaves__temp_30m.json", temp_50m:"marine_heatwaves__temp_50m.json"};
 const UP_VARS = ["sst","chl","nitrate","upwelling_index","temp_10m","temp_20m","temp_30m","diatoms","micro_phyto"];
+// measurements that can respond to run-off, so heavy rain is marked on their charts
+const RAIN_VARS = ["chl","kd490","bbp443","cdom_adg443","nitrate","phosphate","ammonium","salinity","diatoms","dinoflagellates","micro_phyto","pp_sat","precip","precip_7d","precip_30d"];
 async function overlays(cfg, loc, choice){
   const ov = {};
   if (MHW_FILES[cfg.v] && !choice){ try { ov.heat = (await getJSON(MHW_FILES[cfg.v]))[loc] || null; } catch(e){} }
   if (cfg.v === "chl" && !choice && blooms) ov.bloom = blooms[loc] || null;
   if (upwelling && UP_VARS.includes(cfg.v)) ov.up = upwelling;
+  if (rain && RAIN_VARS.includes(cfg.v)) ov.rain = rain;
   ov.forecast = await getForecast(cfg.v, loc);
   return ov;
 }
@@ -1336,6 +1547,7 @@ async function renderChart(){
   const unit = series.unit ? series.unit.replace("degC","°C").replace("uatm","µatm").replace("m-3","m⁻³").replace("m-1","m⁻¹").replace("m-2","m⁻²").replace("day-1","day⁻¹").replace("s-1","s⁻¹") : "";
   const used = (series.source_labels || series.sources).join(", ");
   $("chart-sub").textContent = `${series.name}${unit && unit !== "1" ? ` (${unit})` : ""} · ${series.record.first.slice(0,4)}–${series.record.last.slice(0,4)} · ${got.choice ? "Source" : "Sources"}: ${used}`;
+  if (cfg.dir){ renderDirStats(series, cfg); drawDirection(svg, series, cfg); return; }
   renderStats(series, cfg);
   if (state.mode === "season") drawSeason(svg, series, cfg); else drawRecord(svg, series, cfg);
 }
@@ -1406,9 +1618,11 @@ function drawSeason(svg, series, cfg){
   const heatDays = heat ? eventDays(heat.events, yr) : [];
   const bloomDays = bloom ? eventDays(bloom.events, yr) : [];
   const upDays = ov.up ? eventDays(ov.up.events, yr) : [];
+  const rainDays = ov.rain ? eventDays(ov.rain.events, yr) : [];
   heatDays.forEach(d => el("rect", {x:x(d)-1.4, y:f.M.t, width:2.8, height:f.ih, fill:"#F6D5CA"}, svg));
   bloomDays.forEach(d => el("rect", {x:x(d)-1.4, y:f.M.t, width:2.8, height:f.ih, fill:"#D5EDD3"}, svg));
   upDays.forEach(d => el("rect", {x:x(d)-1.4, y:f.M.t+f.ih-7, width:2.8, height:7, fill:"#00A58A"}, svg));
+  rainDays.forEach(d => el("rect", {x:x(d)-1.4, y:f.M.t+f.ih-(upDays.length ? 16 : 7), width:2.8, height:7, fill:"#5B7DB1"}, svg));
   dustDays.forEach(d => el("rect", {x:x(d)-2, y:f.M.t, width:4, height:f.ih, fill:"#B7791F", opacity:0.09}, svg));
   dustDays.forEach(d => el("path", {d:`M${x(d)-5},${f.M.t-10}L${x(d)+5},${f.M.t-10}L${x(d)},${f.M.t-2}Z`, fill:"#B7791F"}, svg));
   const items = [];
@@ -1461,6 +1675,7 @@ function drawSeason(svg, series, cfg){
   if (heatDays.length) items.push(["heat","","Marine heatwave day"]);
   if (bloomDays.length) items.push(["green","","Bloom day"]);
   if (upDays.length) items.push(["tick","","Upwelling event"]);
+  if (rainDays.length) items.push(["rtick","",`Heavy rain (${fmt(ov.rain.heavy_mm,0)} mm in a day) or first flush (${fmt(ov.rain.flush_mm,0)} mm after ${ov.rain.dry_days} dry days)`]);
   if (dustDays.length) items.push(["tri","","Saharan dust day"]);
   legend(items);
   hover(svg, f, (px) => {
@@ -1479,6 +1694,7 @@ function drawSeason(svg, series, cfg){
     if (heatDays.includes(i+1)) rows.push(["", "Marine heatwave"]);
     if (bloomDays.includes(i+1)) rows.push(["", "Bloom"]);
     if (upDays.includes(i+1)) rows.push(["", "Upwelling"]);
+    if (rainDays.includes(i+1)) rows.push(["", "Heavy rain"]);
     if (dustDays.includes(i+1)) rows.push(["", "Saharan dust day"]);
     const date = day ? fmtDate(day[2]) : new Date(Date.UTC(+yr,0,i+1)).toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"UTC"});
     return {x:x(i+1), y: day ? f.y(day[1]) : null, title: date, rows};
@@ -1536,6 +1752,83 @@ function drawRecord(svg, series, cfg){
     const bv = bloom && bloom.events.find(e => p[2] >= e.start && p[2] <= e.end);
     if (bv) out.push(["Bloom", `×${fmt(bv.peak_ratio, 1)} normal, ${bv.days} days`]);
     return {x:x(p[0]), y:f.y(p[1]), title:fmtDate(p[2]), rows:out};
+  });
+}
+
+/* ---------------- direction charts ---------------- */
+// Directions wrap round (359° is next to 1°), so an average or a standard deviation of them means
+// nothing. They are drawn as one dot per day on a compass scale, with how often each way is seen.
+const DIR_NAMES = ["north","north-east","east","south-east","south","south-west","west","north-west"];
+const dirSector = deg => Math.round(((deg % 360) + 360) % 360 / 45) % 8;
+function dirShares(rows){
+  const n = rows.length, counts = new Array(8).fill(0);
+  let east = 0, west = 0;
+  rows.forEach(r => { const d = ((r[1] % 360) + 360) % 360; counts[dirSector(d)]++; if (d >= 45 && d <= 135) east++; if (d >= 225 && d <= 315) west++; });
+  return {n, counts, east: n ? east / n : 0, west: n ? west / n : 0};
+}
+function dirWords(cfg){
+  return cfg.v === "wind_dir" ? {e:"Levanter (easterly)", w:"Poniente (westerly)", verb:"from"}
+       : cfg.v === "hf_current_dir" ? {e:"Flowing east", w:"Flowing west", verb:"towards"}
+       : {e:"From the east", w:"From the west", verb:"from"};
+}
+function renderDirStats(series, cfg){
+  const all = dirShares(series.data);
+  const yr = series.data.filter(r => r[0].startsWith(state.year));
+  const ys = dirShares(yr);
+  const top = all.counts.indexOf(Math.max(...all.counts));
+  const w = dirWords(cfg);
+  const pct = x => fmt(x * 100, 0) + "%";
+  $("stats").innerHTML = [
+    ["Most common", `${w.verb} ${DIR_NAMES[top]}`, `${pct(all.counts[top] / (all.n || 1))} of days on record`],
+    [w.e, pct(all.east), state.mode === "season" ? `${pct(ys.east)} of days in ${state.year}` : "of days on record"],
+    [w.w, pct(all.west), state.mode === "season" ? `${pct(ys.west)} of days in ${state.year}` : "of days on record"],
+    ["Days of data", fmt(all.n, 0), `${series.record.first.slice(0,4)}–${series.record.last.slice(0,4)}`],
+  ].map(s => `<div class="stat"><div class="k">${s[0]}</div><div class="v num">${s[1]}</div><div class="d num">${s[2]}</div></div>`).join("");
+  $("chart-note").textContent = `Each dot is one day's average direction (${w.verb === "towards" ? "the way the water is flowing" : "the way it is coming from"}). East covers 45–135°, west 225–315°. Directions go round in a circle, so no average or standard deviation is shown.`;
+}
+function drawDirection(svg, series, cfg){
+  const season = state.mode === "season", yr = state.year;
+  const W = 960, H = 400, M = {l:56, r:118, t:22, b:34};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const y = v => M.t + ih - v / 360 * ih;
+  const f = {W, H, M, iw, ih, y};
+  const w = dirWords(cfg);
+  // east and west bands, the two ways the wind and sea mostly go through the Strait
+  el("rect", {x:M.l, y:y(135), width:iw, height:y(45) - y(135), fill:"#EEF2F8"}, svg);
+  el("rect", {x:M.l, y:y(315), width:iw, height:y(225) - y(315), fill:"#EEF2F8"}, svg);
+  el("text", {x:M.l+iw+8, y:y(90)+4, fill:"#2E4A6B", "font-size":12}, svg).textContent = w.e.split(" (")[0];
+  el("text", {x:M.l+iw+8, y:y(270)+4, fill:"#2E4A6B", "font-size":12}, svg).textContent = w.w.split(" (")[0];
+  [[0,"N"],[90,"E"],[180,"S"],[270,"W"],[360,"N"]].forEach(([v, lab]) => {
+    el("line", {x1:M.l, x2:M.l+iw, y1:y(v), y2:y(v), stroke:"#E6EFF3", "stroke-width":1}, svg);
+    el("text", {x:M.l-8, y:y(v)+4, "text-anchor":"end", fill:"#6B7F87", "font-size":12}, svg).textContent = `${lab} ${v === 360 ? "" : v + "°"}`.trim();
+  });
+  el("line", {x1:M.l, x2:M.l+iw, y1:M.t+ih, y2:M.t+ih, stroke:"#C5D6DD", "stroke-width":1}, svg);
+  const norm = v => ((v % 360) + 360) % 360;
+  let pts, x;
+  if (season){
+    pts = series.data.filter(r => r[0].startsWith(yr)).map(r => [doyOf(r[0]), norm(r[1]), r[0]]);
+    x = d => M.l + (d - 1) / 364 * iw;
+    [1,32,60,91,121,152,182,213,244,274,305,335].forEach((d, i) => el("text", {x:x(d+14), y:H-12, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = MONTHS[i]);
+  } else {
+    pts = series.data.map(r => [Date.parse(r[0] + "T00:00:00Z"), norm(r[1]), r[0]]);
+    const t0 = pts.length ? pts[0][0] : 0, t1 = pts.length ? pts[pts.length-1][0] : 1;
+    x = t => M.l + (t - t0) / (t1 - t0 || 1) * iw;
+    const y0 = new Date(t0).getUTCFullYear(), y1 = new Date(t1).getUTCFullYear(), stepY = Math.max(1, Math.ceil((y1 - y0) / 10));
+    for (let yy = y0 + (y0 % stepY ? stepY - y0 % stepY : 0); yy <= y1; yy += stepY){
+      const t = Date.UTC(yy,0,1); if (t < t0) continue;
+      el("text", {x:x(t), y:H-12, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = yy;
+    }
+  }
+  const r = season ? 2.6 : 1.4, op = season ? 0.9 : Math.max(0.15, Math.min(0.6, 600 / (pts.length || 1)));
+  pts.forEach(p => el("circle", {cx:x(p[0]).toFixed(1), cy:y(p[1]).toFixed(1), r, fill:"#0074A6", "fill-opacity":op}, svg));
+  if (season && pts.length){ const lp = pts[pts.length-1]; el("circle", {cx:x(lp[0]), cy:y(lp[1]), r:4.5, fill:"#0074A6", stroke:"#fff", "stroke-width":2}, svg); }
+  legend([["wdot","",season ? `Daily direction, ${yr}` : "Daily direction"],["eband","","East (45–135°) and west (225–315°)"]]);
+  hover(svg, f, px => {
+    if (!pts.length) return null;
+    const target = season ? Math.round((px - M.l) / iw * 364) + 1 : pts[0][0] + (px - M.l) / iw * (pts[pts.length-1][0] - pts[0][0]);
+    const p = pts.reduce((b, q) => Math.abs(q[0] - target) < Math.abs(b[0] - target) ? q : b, pts[0]);
+    if (season && Math.abs(p[0] - target) > 3) return null;
+    return {x:x(p[0]), y:y(p[1]), title:fmtDate(p[2]), rows:[["Direction", `${fmt(p[1], 0)}° (${w.verb} ${DIR_NAMES[dirSector(p[1])]})`]]};
   });
 }
 
@@ -1613,7 +1906,7 @@ function renderEvents(){
   const withTrig = b ? b.events.filter(e => (e.triggers || []).length).length : 0;
   $("events-summary").innerHTML = `
     <div class="panel"><div class="big num">${b ? bYear.length : "–"}</div><div class="k">blooms in ${areaName(state.area)} this year (${b ? b.events.length : 0} on record)</div></div>
-    <div class="panel"><div class="big num">${b && b.events.length ? fmt(withTrig / b.events.length * 100, 0) + "%" : "–"}</div><div class="k">of blooms followed upwelling, dust or a heatwave</div></div>
+    <div class="panel"><div class="big num">${b && b.events.length ? fmt(withTrig / b.events.length * 100, 0) + "%" : "–"}</div><div class="k">of blooms followed upwelling, dust, heavy rain or a heatwave</div></div>
     <div class="panel"><div class="big num">${u ? upYear.length : "–"}</div><div class="k">upwelling events this year (${u ? u.events.length : 0} on record)</div></div>
     <div class="panel"><div class="big num">${avgCool == null ? "–" : signed(avgCool, 1) + " °C"}</div><div class="k">average change in Western Alboran sea temperature during upwelling</div></div>`;
   if (!b || !b.events.length){
@@ -1799,7 +2092,7 @@ async function boot(){
     [meta, latest] = await Promise.all([getJSON("meta.json"), getJSON("latest.json")]);
     try { dust = await getJSON("dust_events.json"); } catch(e){ dust = null; }
     try { mhw = await getJSON("marine_heatwaves.json"); } catch(e){ mhw = null; }
-    [upwelling, blooms, tides, wildlife] = await Promise.all(["upwelling.json", "blooms.json", "tides.json", "wildlife.json"].map(f => getJSON(f).catch(() => null)));
+    [upwelling, blooms, tides, wildlife, rain] = await Promise.all(["upwelling.json", "blooms.json", "tides.json", "wildlife.json", "rain.json"].map(f => getJSON(f).catch(() => null)));
   } catch(e){
     $("cards").innerHTML = `<div class="error">The data files couldn't be loaded (${esc(e.message)}). They are published after each morning's harvest; please try again later.</div>`;
     $("updated").textContent = "";
