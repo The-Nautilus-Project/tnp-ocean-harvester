@@ -833,6 +833,70 @@ class ExportNewProductsTests(unittest.TestCase):
         tmp.cleanup()
 
 
+class RainTests(unittest.TestCase):
+    def test_rain_events_and_totals(self):
+        from harvester import derived as dv
+        idx = pd.date_range("2025-06-01", "2025-10-31", freq="D")
+        s = pd.Series(0.0, index=idx)
+        s["2025-06-10"] = 3.0                      # small rain, resets the dry spell
+        s["2025-09-01"] = 6.0; s["2025-09-02"] = 7.0   # first flush: 13 mm after 82 dry days
+        s["2025-09-20"] = 25.0                     # heavy rain after a short dry spell
+        s["2025-09-25"] = 4.0                      # wet but neither heavy nor a flush
+        s["2025-10-29"] = 0.5                      # below the wet threshold, so still dry
+        res = dv.rain_events(s, wet_mm=1, heavy_mm=20, flush_mm=10, dry_days=30)
+        kinds = [(e["start"], e["kind"]) for e in res["events"]]
+        self.assertEqual(kinds, [("2025-09-01", "first_flush"), ("2025-09-20", "heavy")])
+        self.assertEqual(res["events"][0]["total"], 13.0)
+        self.assertEqual(res["events"][0]["dry_before"], 82)
+        self.assertEqual(res["status"]["last_wet_day"], "2025-09-25")
+        self.assertEqual(res["status"]["dry_days"], 36)
+        # a missing day breaks the dry spell, so no flush is claimed across a gap
+        g = s.drop(pd.Timestamp("2025-08-20"))
+        self.assertEqual([e["kind"] for e in dv.rain_events(g)["events"]], ["heavy"])
+        tot = dv.rolling_totals(s, 7)
+        self.assertEqual(tot["2025-09-07"], 13.0)
+        self.assertEqual(tot.index[0], pd.Timestamp("2025-06-07"))
+        self.assertTrue(pd.isna(dv.rolling_totals(g, 7).get(pd.Timestamp("2025-08-22"))))
+
+    def test_export_publishes_rain_totals_and_triggers(self):
+        tmp = tempfile.TemporaryDirectory()
+        db = Database(f"sqlite:///{tmp.name}/t.db"); db.init_schema()
+        today = datetime(2026, 9, 17)
+        start = today - timedelta(days=4 * 365)
+        obs = []
+        for h in range(int((today - start).total_seconds() // 3600)):
+            t = start + timedelta(hours=h)
+            rain = 2.0 if (t.month == 11 and t.hour < 12) else 0.0
+            if t.date() == date(2026, 9, 1) and t.hour < 10:
+                rain = 3.0                          # 30 mm day after a dry summer
+            obs.append(Observation("openmeteo_era5", "precip", "gibraltar_airport", t, rain, n_valid=1, n_total=1))
+            obs.append(Observation("openmeteo_era5", "slp", "gibraltar_airport", t, 1015.0, n_valid=1, n_total=1))
+        rng = np.random.default_rng(1)
+        for d in pd.date_range(start, today, freq="D"):
+            chl = 3.0 if pd.Timestamp("2026-09-05") <= d <= pd.Timestamp("2026-09-12") else 0.3 * (1 + rng.normal(0, .1))
+            obs.append(Observation("cmems_med_chl_my", "chl", "gibraltar_20km", d.to_pydatetime(), chl,
+                                   val_median=chl, n_valid=9, n_total=9))
+        db.upsert_observations(obs)
+        cfg = {**CONFIG, "export": {**CONFIG["export"], "output_dir": f"{tmp.name}/pub", "site_dir": f"{tmp.name}/nosite"}}
+        export(cfg, db, log=lambda *a: None, today=today.date())
+        out = Path(f"{tmp.name}/pub")
+        w7 = json.loads((out / "daily" / "precip_7d__gibraltar_airport.json").read_text())
+        self.assertEqual(w7["sources"], ["derived_rain"])
+        self.assertEqual(w7["source_labels"], ["Summed from daily rainfall"])
+        last = dict((r[0], r[1]) for r in w7["data"])
+        self.assertAlmostEqual(last["2026-09-07"], 30.0)
+        self.assertTrue((out / "daily" / "precip_30d__gibraltar_airport.json").exists())
+        self.assertTrue((out / "daily" / "slp__gibraltar_airport.json").exists())
+        rain = json.loads((out / "rain.json").read_text())
+        self.assertIn("2026-09-01", [e["start"] for e in rain["events"]])
+        self.assertEqual(rain["status"]["last_wet_day"], "2026-09-01")
+        blooms = json.loads((out / "blooms.json").read_text())["gibraltar_20km"]
+        sept = [e for e in blooms["events"] if e["start"].startswith("2026-09")]
+        self.assertTrue(sept and "rain" in {t["type"] for t in sept[0]["triggers"]})
+        db.close()
+        tmp.cleanup()
+
+
 NEMO_SAMPLE = """ID,Reported,Parent,Species,User,Group,Lat,Lon,Notes,Verified
 101,09/06/2018 13:16,Fish,Grey Triggerfish,100663 - Anonymous,-,36.135462,-5.354981,,No,Visible
 102,21/07/2024 00:00,Jellyfish,Mauve stinger,100663 - Anonymous,-,36.121442,-5.355472,Lots of them,No,Visible
