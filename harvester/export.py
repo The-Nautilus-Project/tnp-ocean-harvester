@@ -10,6 +10,7 @@ Produces, under export.output_dir (default public/data):
   forecast/<variable>__<location>.json  daily forecast for the days after today
   upwelling.json                     upwelling index events and status
   blooms.json                        chlorophyll bloom events (with possible triggers) and status
+  rain.json                          heavy rain and first-flush wet spells (run-off), and the current dry spell
   tides.json                         tide predictions, high and low waters, recent observed vs predicted
   wildlife.json                      NEMO sightings: counts, species calendar, gelatinous and invasive watches
   <private_dir>/nemo_matched.csv     every sighting with the sea conditions at the time (not published)
@@ -323,7 +324,8 @@ def marine_heatwaves(sst: pd.Series, baseline=(1991, 2020), min_days=5, max_gap_
             "events": events, "status": status}
 
 
-DERIVED_LABELS = {"derived_light": "Derived from satellite PAR and KD490"}
+DERIVED_LABELS = {"derived_light": "Derived from satellite PAR and KD490",
+                  "derived_rain": "Summed from daily rainfall"}
 
 
 def source_label(config: dict, code: str) -> str:
@@ -584,6 +586,19 @@ def export(config: dict, db: Database, log=print, today=None):
                                                 light.get("depths", [5, 10, 20])).items():
                 add(f"par_{int(d)}m", loc, "derived_light", series)
 
+    # rainfall totals over the last week and month, which say more about run-off than one day's rain
+    rain_cfg = ecfg.get("rain") or {}
+    rain_var = rain_cfg.get("variable", "precip")
+    if rain_cfg:
+        for (variable, loc) in list(grouped):
+            if variable != rain_var:
+                continue
+            daily = merged_for(variable, loc)
+            if daily.empty:
+                continue
+            for w in rain_cfg.get("windows", [7, 30]):
+                add(f"{rain_var}_{int(w)}d", loc, "derived_rain", dv.rolling_totals(daily["value"], int(w)))
+
     merged_by_key = {}
     latest = []
     for (variable, location), per_source in sorted(grouped.items()):
@@ -701,6 +716,19 @@ def export(config: dict, db: Database, log=print, today=None):
             (out_dir / "upwelling.json").write_text(json.dumps(payload, separators=(",", ":")))
             log(f"Upwelling: {len(up_events)} events, now {status['state'] if status else 'n/a'}")
 
+    rain_payload = None
+    if rain_cfg:
+        m = merged_by_key.get((rain_var, rain_cfg.get("location", "gibraltar_airport")))
+        if m is not None and not m.empty:
+            rain_payload = dv.rain_events(m["value"].astype(float), float(rain_cfg.get("wet_mm", 1)),
+                                          float(rain_cfg.get("heavy_mm", 20)), float(rain_cfg.get("flush_mm", 10)),
+                                          int(rain_cfg.get("dry_days", 30)))
+            rain_payload.update({k: rain_cfg.get(k) for k in ("location", "wet_mm", "heavy_mm", "flush_mm", "dry_days")})
+            (out_dir / "rain.json").write_text(json.dumps(rain_payload, separators=(",", ":")))
+            log(f"Rain: {len(rain_payload['events'])} heavy or first-flush spells, "
+                f"{rain_payload['status']['dry_days']} dry days to {rain_payload['status']['date']}")
+    rain_trigger = [{"start": e["start"], "end": e["end"]} for e in (rain_payload or {}).get("events", [])]
+
     bcfg = ecfg.get("blooms") or {}
     if bcfg:
         blooms = {}
@@ -715,7 +743,8 @@ def export(config: dict, db: Database, log=print, today=None):
                 continue
             triggers = {"upwelling": up_events,
                         "dust": [{"start": e["start"], "end": e["end"]} for e in events.get("episodes", [])],
-                        "heatwave": (mhw_by_var.get(mcfg.get("variable", "sst"), {}).get(loc) or {}).get("events", [])}
+                        "heatwave": (mhw_by_var.get(mcfg.get("variable", "sst"), {}).get(loc) or {}).get("events", []),
+                        "rain": rain_trigger}
             dv.attach_triggers(res["events"], triggers, int(bcfg.get("trigger_lookback_days", 10)))
             blooms[loc] = res
         (out_dir / "blooms.json").write_text(json.dumps(blooms, separators=(",", ":")))

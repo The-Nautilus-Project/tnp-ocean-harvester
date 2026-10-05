@@ -240,6 +240,79 @@ def detect_blooms(chl: pd.Series, percentile: float = 0.9, min_days: int = 3, ma
             "events": events, "status": status}
 
 
+def rolling_totals(daily: pd.Series, days: int) -> pd.Series:
+    """Running total over the last `days` days (inclusive), only where every one of those days has data."""
+    if daily is None or daily.empty:
+        return pd.Series(dtype=float)
+    s = daily.astype(float).sort_index()
+    s = s[~s.index.duplicated(keep="last")]
+    full = s.reindex(pd.date_range(s.index.min(), s.index.max(), freq="D"))
+    return full.rolling(int(days), min_periods=int(days)).sum().dropna()
+
+
+def rain_events(daily: pd.Series, wet_mm: float = 1.0, heavy_mm: float = 20.0, flush_mm: float = 10.0,
+                dry_days: int = 30) -> dict:
+    """Wet spells that matter for run-off, from daily rainfall (mm).
+
+    A wet spell is a run of consecutive days with at least `wet_mm`. It is listed when either
+      - heavy: any day in it reaches `heavy_mm`, or
+      - first flush: it totals at least `flush_mm` and follows `dry_days` or more dry days,
+        so the first proper rain washes what has built up on a dry catchment into the sea.
+    Missing days break a spell and are not counted as dry.
+    Returns {"events": [...], "status": {...}} with dates as YYYY-MM-DD.
+    """
+    out = {"events": [], "status": None}
+    if daily is None or daily.empty:
+        return out
+    s = daily.astype(float).sort_index()
+    s = s[~s.index.duplicated(keep="last")]
+    full = s.reindex(pd.date_range(s.index.min(), s.index.max(), freq="D"))
+    vals = full.values
+    days = full.index
+    wet = np.where(np.isfinite(vals), vals >= wet_mm, False)
+    known = np.isfinite(vals)
+
+    dry_run = 0          # dry days immediately before the current position (missing days reset it)
+    i, n = 0, len(vals)
+    while i < n:
+        if not known[i]:
+            dry_run = 0
+            i += 1
+            continue
+        if not wet[i]:
+            dry_run += 1
+            i += 1
+            continue
+        j = i
+        while j + 1 < n and known[j + 1] and wet[j + 1]:
+            j += 1
+        seg = vals[i:j + 1]
+        total, peak = float(np.nansum(seg)), float(np.nanmax(seg))
+        heavy = peak >= heavy_mm
+        flush = total >= flush_mm and dry_run >= dry_days
+        if heavy or flush:
+            k = int(np.nanargmax(seg))
+            out["events"].append({
+                "start": days[i].strftime("%Y-%m-%d"), "end": days[j].strftime("%Y-%m-%d"),
+                "days": int(j - i + 1), "total": _r(total, 1), "peak": _r(peak, 1),
+                "peak_date": days[i + k].strftime("%Y-%m-%d"),
+                "kind": "first_flush" if flush else "heavy", "heavy": bool(heavy),
+                "dry_before": int(dry_run)})
+        dry_run = 0
+        i = j + 1
+
+    # where things stand on the last day with data
+    last_i = int(np.where(known)[0][-1])
+    since = 0
+    for k in range(last_i, -1, -1):
+        if not known[k] or wet[k]:
+            break
+        since += 1
+    last_wet = next((days[k].strftime("%Y-%m-%d") for k in range(last_i, -1, -1) if known[k] and wet[k]), None)
+    out["status"] = {"date": days[last_i].strftime("%Y-%m-%d"), "dry_days": int(since), "last_wet_day": last_wet}
+    return out
+
+
 def attach_triggers(bloom_events: list, triggers: dict, lookback_days: int = 10, overlap_days: int = 2):
     """Add `triggers` to each bloom: events of other kinds that ended within `lookback_days` before the
     bloom started (or overlapped its first days). triggers = {kind: [{start, end, ...}]}."""
