@@ -675,7 +675,7 @@ sources:
     label: ERA5 reanalysis
     enabled: true
     type: openmeteo_archive
-    description: ERA5 reanalysis via Open-Meteo, hourly wind, rain, air temperature, solar radiation
+    description: ERA5 reanalysis via Open-Meteo, hourly wind, rain, air temperature, pressure, solar radiation
     points: [gibraltar_airport]
     model: era5
     variables:
@@ -684,6 +684,7 @@ sources:
       wind_gusts_10m: wind_gust
       precipitation: precip
       temperature_2m: air_temp
+      pressure_msl: slp                # sea level pressure; the airport station feed stopped in Aug 2025
       shortwave_radiation: sw_rad      # used for the ERA5 PAR estimate
     earliest: "1991-01-01"   # matches the 1991-2020 heatwave baseline; hourly, so depth is costly
     chunk_days: 365
@@ -711,7 +712,7 @@ sources:
     label: Open-Meteo forecast
     enabled: true
     type: openmeteo_forecast
-    description: Weather forecast models via Open-Meteo, hourly wind, gusts, rain and air temperature for the last week and the week ahead
+    description: Weather forecast models via Open-Meteo, hourly wind, gusts, rain, air temperature and pressure for the last week and the week ahead
     points: [gibraltar_airport]
     variables:
       wind_speed_10m: wind_speed
@@ -719,6 +720,7 @@ sources:
       wind_gusts_10m: wind_gust
       precipitation: precip
       temperature_2m: air_temp
+      pressure_msl: slp
     past_days: 7                     # fills the few days ERA5 lags behind
     forecast_days: 7
     rolling_window_days: 7
@@ -815,7 +817,9 @@ variables:
   precip_6h:    {group: physical, name: "Precipitation (station, 6 h)", unit: mm}
   precip_12h:   {group: physical, name: "Precipitation (station, 12 h)", unit: mm}
   precip_24h:   {group: physical, name: "Precipitation (station, 24 h)", unit: mm}
-  slp:          {group: physical, name: "Sea level pressure", unit: hPa}
+  slp:          {group: physical, name: "Sea level pressure", unit: hPa, valid_range: [940, 1060]}
+  precip_7d:    {group: physical, name: "Rainfall over the last 7 days", unit: mm, valid_range: [0, 1500]}
+  precip_30d:   {group: physical, name: "Rainfall over the last 30 days", unit: mm, valid_range: [0, 3000]}
   air_temp:     {group: physical, name: "Air temperature", unit: degC}
   sw_rad:       {group: physical, name: "Incoming shortwave radiation (ERA5)", unit: W m-2}
   par_era5:     {group: physical, name: "PAR estimated from ERA5 shortwave radiation", unit: einstein m-2 day-1}
@@ -901,6 +905,20 @@ export:
     depths: [5, 10, 15, 20]
 
   # Chlorophyll blooms: 3+ days above the seasonal 90th percentile (cloud gaps up to 3 days bridged)
+  # Rain and run-off. Rolling 7- and 30-day totals are published as their own series (with normals),
+  # and rain events are listed so blooms can name heavy rain as a possible trigger.
+  #   heavy_mm:    a wet spell with any day at or above this counts as heavy rain
+  #   flush_mm:    a wet spell totalling at least this, after dry_days with less than wet_mm a day,
+  #                counts as a "first flush" (the first proper rain to wash a dry catchment out)
+  rain:
+    variable: precip
+    location: gibraltar_airport
+    wet_mm: 1
+    heavy_mm: 20
+    flush_mm: 10
+    dry_days: 30
+    windows: [7, 30]
+
   blooms:
     variable: chl
     locations: [gibraltar_20km, bay_of_gibraltar, gibraltar_eastside, strait_of_gibraltar, western_alboran]
@@ -1002,6 +1020,7 @@ export:
     par: [nasa_par_pace_nrt, nasa_par_modisa, nasa_par_seawifs]
     wave_hs: [cmems_med_waves_my, cmems_med_waves_anfc]
     wave_tp: [cmems_med_waves_my, cmems_med_waves_anfc]
+    wave_dir: [cmems_med_waves_my, cmems_med_waves_anfc]
     sea_level_anomaly: [cmems_sealevel_my, cmems_sealevel_nrt]   # reprocessed first, NRT fills the tail
     hf_current_speed: [emodnet_hfradar_strait]
     hf_current_dir: [emodnet_hfradar_strait]
@@ -1018,6 +1037,7 @@ export:
     wind_dir: [openmeteo_era5, ncei_isd_lxgb, openmeteo_forecast]
     wind_gust: [openmeteo_era5, ncei_isd_lxgb, openmeteo_forecast]
     precip: [openmeteo_era5, openmeteo_forecast]
+    slp: [openmeteo_era5, ncei_isd_lxgb, openmeteo_forecast]
     air_temp: [openmeteo_era5, ncei_isd_lxgb, openmeteo_forecast]
     upwelling_index: [openmeteo_era5, openmeteo_forecast]
     dust_sfc: [openmeteo_cams_dust]
