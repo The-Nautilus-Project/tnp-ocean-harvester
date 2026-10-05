@@ -98,6 +98,8 @@ a{color:var(--data)}
 .cards .subhead h3{font-size:16px;color:var(--blue-deep)}
 .cards .subhead p{margin:0;font-size:13px;color:var(--muted);max-width:80ch}
 .card .bars{width:100%;height:44px;display:block}
+.card .compass{width:100%;max-width:190px;height:auto;display:block;margin:2px auto 0}
+.card .fc .arr{display:block;width:22px;height:22px;margin:2px auto 0}
 .card .flag{font-size:13px;margin:0;padding:4px 8px;border-left:3px solid #5B7DB1;background:#EEF2F8;color:#2E4A6B}
 .chip.heat{color:#8E2B12;background:#FBE9E3;border-color:#EDB9A8}
 .mix{display:flex;height:14px;width:100%;overflow:hidden;border:1px solid var(--grid)}
@@ -531,6 +533,7 @@ const VARS = [
   // physical: weather and rain
   {g:"physical", sub:"weather", v:"rain", special:"rain", title:"Rain", loc:"gibraltar_airport", where:"Airport", chartVar:"precip_30d", chartFallback:"precip"},
   {g:"physical", sub:"weather", v:"wind_speed", title:"Wind", loc:"gibraltar_airport", where:"Airport", unit:"m/s", dp:1, up:"Windier", down:"Calmer", floor0:true},
+  {g:"physical", sub:"weather", v:"winddir", special:"compass", title:"Wind direction", loc:"gibraltar_airport", where:"Airport", chartVar:"wind_dir"},
   {g:"physical", sub:"weather", v:"wind_gust", title:"Wind gusts", loc:"gibraltar_airport", where:"Airport", unit:"m/s", dp:1, up:"Gustier", down:"Less gusty", floor0:true},
   {g:"physical", sub:"weather", v:"slp", title:"Air pressure", loc:"gibraltar_airport", where:"Airport", unit:"hPa", dp:0, up:"Higher", down:"Lower"},
   {g:"physical", sub:"weather", v:"wind_dir", title:"Wind direction (from)", loc:"gibraltar_airport", where:"Airport", unit:"°", dp:0, dir:true, card:false},
@@ -801,6 +804,7 @@ async function renderCards(){
     if (cfg.special === "invasive") return invasiveCard(cfg);
     if (cfg.special === "strandings") return strandingsCard(cfg);
     if (cfg.special === "rain") return rainCard(cfg);
+    if (cfg.special === "compass") return compassCard(cfg);
     const loc = locFor(cfg);
     let got = null;
     try { got = await getSeries(cfg, loc); } catch(e){}
@@ -1830,6 +1834,86 @@ function drawDirection(svg, series, cfg){
     if (season && Math.abs(p[0] - target) > 3) return null;
     return {x:x(p[0]), y:y(p[1]), title:fmtDate(p[2]), rows:[["Direction", `${fmt(p[1], 0)}° (${w.verb} ${DIR_NAMES[dirSector(p[1])]})`]]};
   });
+}
+
+/* ---------------- wind compass ---------------- */
+// Today's wind as an arrow across a compass, blowing from where the wind comes from towards where it
+// goes, over a wind rose of the last 30 days so you can see whether today is typical.
+const SECTOR_SHORT = ["N","NE","E","SE","S","SW","W","NW"];
+const bearingXY = (cx, cy, r, deg) => [cx + r * Math.sin(deg * Math.PI / 180), cy - r * Math.cos(deg * Math.PI / 180)];
+function compassSvg(fromDeg, shares, centre){
+  const S = 200, c = S / 2, R = 78;
+  const parts = [];
+  // rings and ticks
+  parts.push(`<circle cx="${c}" cy="${c}" r="${R}" fill="#F7FBFC" stroke="#C5D6DD" stroke-width="1.5"/>`);
+  parts.push(`<circle cx="${c}" cy="${c}" r="${R/2}" fill="none" stroke="#E6EFF3" stroke-width="1"/>`);
+  for (let d = 0; d < 360; d += 15){
+    const major = d % 90 === 0, mid = d % 45 === 0;
+    const [x1, y1] = bearingXY(c, c, R, d), [x2, y2] = bearingXY(c, c, R - (major ? 9 : mid ? 6 : 3), d);
+    parts.push(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${major ? "#7F97A0" : "#B4C6CD"}" stroke-width="${major ? 1.5 : 1}"/>`);
+  }
+  // wind rose: one petal per sector, length set by how often the wind came from there
+  if (shares){
+    const top = Math.max(...shares) || 1;
+    shares.forEach((sh, k) => {
+      if (!sh) return;
+      const r = 10 + (R - 18) * sh / top, a = k * 45;
+      const [x1, y1] = bearingXY(c, c, r, a - 17), [x2, y2] = bearingXY(c, c, r, a + 17);
+      parts.push(`<path d="M${c},${c}L${x1.toFixed(1)},${y1.toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 0 1 ${x2.toFixed(1)},${y2.toFixed(1)}Z" fill="#CFE7F2" stroke="#A9D3E6" stroke-width="1"/>`);
+    });
+  }
+  // compass letters
+  [["N",0],["E",90],["S",180],["W",270]].forEach(([t, d]) => {
+    const [x, y] = bearingXY(c, c, R + 12, d);
+    parts.push(`<text x="${x.toFixed(1)}" y="${(y + 4.5).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="700" fill="${t === "N" ? "#005E84" : "#6B7F87"}">${t}</text>`);
+  });
+  // today's arrow: tail on the side the wind comes from, head on the side it blows to
+  if (fromDeg != null && isFinite(fromDeg)){
+    const [tx, ty] = bearingXY(c, c, R - 4, fromDeg), [hx, hy] = bearingXY(c, c, R - 4, fromDeg + 180);
+    const [b1x, b1y] = bearingXY(hx, hy, 13, fromDeg - 24), [b2x, b2y] = bearingXY(hx, hy, 13, fromDeg + 24);
+    parts.push(`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#005E84" stroke-width="4" stroke-linecap="round"/>`);
+    parts.push(`<path d="M${hx.toFixed(1)},${hy.toFixed(1)}L${b1x.toFixed(1)},${b1y.toFixed(1)}L${b2x.toFixed(1)},${b2y.toFixed(1)}Z" fill="#005E84" stroke="#005E84" stroke-width="2" stroke-linejoin="round"/>`);
+    parts.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="5" fill="#fff" stroke="#005E84" stroke-width="2.5"/>`);
+  }
+  if (centre) parts.push(`<rect x="${c-27}" y="${c-12}" width="54" height="24" rx="3" fill="#fff" stroke="#D6E6EC"/><text x="${c}" y="${c+5}" text-anchor="middle" font-size="13" font-weight="700" fill="#2B3A40">${centre}</text>`);
+  return `<svg class="compass" viewBox="0 0 ${S} ${S}" role="img" aria-label="Compass: wind from ${fromDeg == null ? "unknown" : DIR_NAMES[dirSector(fromDeg)]}">${parts.join("")}</svg>`;
+}
+// a small arrow pointing the way the wind blows, for the forecast strip
+const windArrow = fromDeg => `<svg class="arr" viewBox="0 0 20 20" aria-hidden="true"><g transform="rotate(${(fromDeg + 180).toFixed(0)} 10 10)"><line x1="10" y1="16" x2="10" y2="5" stroke="#005E84" stroke-width="2.2" stroke-linecap="round"/><path d="M10,2L14.5,8L5.5,8Z" fill="#005E84"/></g></svg>`;
+async function compassCard(cfg){
+  const loc = cfg.loc, where = cfg.where;
+  let got = null;
+  try { got = await getSeries({v:"wind_dir"}, loc); } catch(e){}
+  if (!got || !got.series.data.length) return emptyCard(cfg, where, "Appears once wind direction has been harvested.");
+  const rows = got.series.data, lastRow = rows[rows.length-1], last = lastRow[0];
+  const from = ((lastRow[1] % 360) + 360) % 360;
+  const t1 = Date.parse(last + "T00:00:00Z");
+  const recent = rows.filter(r => t1 - Date.parse(r[0] + "T00:00:00Z") < 30 * 864e5);
+  const sh = dirShares(recent);
+  const shares = sh.counts.map(n => n / (sh.n || 1));
+  const spd = latestFor("wind_speed", loc);
+  const centre = spd && spd.date === last ? `${fmt(spd.value, 1)} m/s` : "";
+  const name = windName(from);
+  const local = from >= 45 && from <= 135 ? {cls:"up", word:"Levanter"} : from >= 225 && from <= 315 ? {cls:"down", word:"Poniente"} : null;
+  const pct = x => fmt(x * 100, 0) + "%";
+  // forecast: one arrow per day
+  let strip = "";
+  const fc = await getForecast("wind_dir", loc);
+  if (fc && fc.data.length){
+    strip = `<div class="fc num"><span class="lab">Forecast</span>${fc.data.slice(0, 5).map(d => {
+      const f = ((d[1] % 360) + 360) % 360;
+      return `<span title="${esc(windName(f))}">${fmtDay(d[0] + "T12:00:00Z")}${windArrow(f)}<b>${SECTOR_SHORT[dirSector(f)]}</b></span>`;
+    }).join("")}</div>`;
+  }
+  return `<button type="button" class="card" data-var="${cfg.v}" aria-current="${state.variable === cfg.chartVar}">
+    <div class="label"><span>${cfg.title}</span><span class="where">${esc(where)}</span></div>
+    <div class="value num">${SECTOR_SHORT[dirSector(from)]}<span class="unit">from ${fmt(from, 0)}°</span></div>
+    <span class="chip ${local ? local.cls : "normal"}"><span aria-hidden="true">●</span>${esc(name.charAt(0).toUpperCase() + name.slice(1))}</span>
+    ${compassSvg(from, shares, centre)}
+    <p class="context num">Last 30 days: ${pct(sh.east)} easterly, ${pct(sh.west)} westerly. Petals show how often the wind came from each direction; the arrow is today, blowing from the open circle.</p>
+    ${strip}
+    <div class="foot"><span>${fmtDate(last)}</span><span>Daily average direction</span></div>
+  </button>`;
 }
 
 function hover(svg, f, pick){
