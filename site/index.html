@@ -7,7 +7,7 @@
 <title>Gibraltar Ocean Observatory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,500&display=swap">
 <style>
 :root{
   --blue:#005E84; --blue-deep:#034560; --data:#0074A6; --teal:#00C2A4; --sky:#76CCF9;
@@ -220,75 +220,311 @@ details ul{padding-left:18px;margin:8px 0}
   .panel{padding:14px}
   .card .value{font-size:30px}
 }
+
+/* ================= redesign: sea-chart look ================= */
+:root{
+  --blue:#0E3A53; --blue-deep:#0B2C40; --data:#1F6F8B; --teal:#0F9D8A; --teal-ink:#0B7A6B; --sky:#9FD3E6;
+  --ink:#0E3A53; --text:#2C4552; --muted:#4F6873; --rule:#C9DAD9; --grid:#E1ECEB;
+  --bg:#EEF4F3; --panel:#FFFFFF; --band:#DCEAEB; --band-edge:#A9C9CC;
+  --sand:#B9771E; --sand-ink:#8A5A12; --sand-bg:#FBF1E1; --cool:#2F6DB0; --cool-ink:#1F5591; --cool-bg:#E6EEF8;
+  --focus:#0F9D8A;
+  --serif:Newsreader,Georgia,"Times New Roman",serif;
+  --sans:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+body{font:400 16px/1.55 var(--sans);color:var(--text);padding-inline:0}
+.wrap{max-width:1200px;padding:0 40px 64px}
+h1,h2,h3{font-family:var(--serif);font-weight:400;color:var(--ink);letter-spacing:-.005em}
+a{color:var(--teal-ink)}
+.skip{position:absolute;left:-9999px;top:8px;background:#fff;padding:8px 12px;z-index:10}
+.skip:focus{left:8px}
+
+/* header */
+.top{background:#F7FAF9;border-bottom:1px solid var(--rule)}
+.top-in{max-width:1200px;margin:0 auto;padding:12px 40px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 32px}
+.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;text-decoration:none}
+.brand .org{font-size:14px;color:var(--muted)}
+.brand .name{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink)}
+.mainnav{display:flex;flex-wrap:wrap;gap:2px 6px}
+.mainnav a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;color:var(--text);text-decoration:none;font-size:15px;border-bottom:2px solid transparent}
+.mainnav a[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--teal)}
+.mainnav a:hover{color:var(--ink)}
+
+/* today: map hero */
+.view{padding-top:32px}
+.hero{background:none;color:inherit;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:32px 56px;align-items:flex-start}
+.hero-text{flex:1 1 340px;max-width:480px;display:flex;flex-direction:column;gap:18px}
+.hero .dateline{margin:0;font-size:15px;color:var(--muted)}
+.hero h1{font-size:clamp(32px,4.2vw,46px);line-height:1.1;color:var(--ink);margin:0}
+.hero .lede{margin:0;font-size:18px;color:var(--text);max-width:34em}
+.keyvals{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 20px;padding:16px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:15px}
+.keyvals dt{color:var(--muted)}
+.keyvals dd{margin:0;color:var(--ink)}
+.keyvals dd b{font-size:18px}
+.keyvals .old{color:var(--muted);font-size:13px}
+.areas{display:flex;flex-wrap:wrap;gap:8px}
+.hero .areas-label{margin:0;width:100%;font-size:15px;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400}
+.areas button{min-height:44px;padding:8px 14px;border:1.5px solid #9DB5B5;background:#fff;color:var(--ink);font-size:15px;border-radius:22px}
+.areas button[aria-pressed="true"]{background:var(--teal-ink);border-color:var(--teal-ink);color:#fff;font-weight:700}
+.map{flex:1.4 1 520px;min-width:0;margin:0;display:flex;flex-direction:column;gap:10px}
+#map svg{display:block;width:100%;height:auto;background:#D9EAEC;border:1px solid #B9CFD0;border-radius:6px}
+.map-key svg{display:inline-block;vertical-align:middle}
+.map .area-hit{cursor:pointer}
+.map .area-hit:hover{stroke:var(--teal-ink);stroke-width:2.5}
+.map-key{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;font-size:14px;color:var(--muted)}
+.map-key .sw{display:inline-flex;gap:3px;align-items:center}
+.map-key .sw i{display:inline-block;width:24px;height:12px}
+
+/* away-from-normal ladder */
+.section{margin-top:56px}
+.section-head{margin-bottom:16px;align-items:flex-end}
+.section-head h2{font-size:32px;line-height:1.2}
+.section-head p{font-size:15px;max-width:48em}
+.panel{border-radius:6px;border-color:var(--rule)}
+.ladder{padding:6px 24px 10px}
+.lad-axis,.lad-row{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(200px,2.4fr) 120px minmax(130px,1fr);gap:4px 24px;align-items:center}
+.lad-axis{padding:10px 0 4px;font-size:13px;color:var(--muted)}
+.lad-row{width:100%;padding:11px 0;border:0;border-top:1px solid var(--grid);background:none;text-align:left;color:inherit;min-height:44px}
+.lad-row:hover{background:#F7FAF9}
+.lad-name b{display:block;color:var(--ink)}
+.lad-name span{display:block;font-size:14px;color:var(--muted)}
+.scale-ax{position:relative;height:18px}
+.scale-ax span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.scale-ax .n{color:var(--ink);font-weight:700}
+.lad-track{position:relative;height:26px}
+.lad-track .base{position:absolute;top:11px;left:0;right:0;height:4px;background:var(--bg)}
+.lad-track .band{position:absolute;top:3px;bottom:3px;left:30%;width:40%;background:var(--band)}
+.lad-track .mid{position:absolute;top:0;bottom:0;left:50%;width:1.5px;background:#8FA9AA}
+.lad-track .bar{position:absolute;top:11px;height:4px}
+.lad-track .dot{position:absolute;top:5px;width:16px;height:16px;margin-left:-8px;border-radius:50%;border:2px solid #fff}
+.lad-val{text-align:right;font-variant-numeric:tabular-nums}
+.lad-val b{display:block;color:var(--ink);font-size:18px}
+.lad-val span{display:block;font-size:13px;color:var(--muted)}
+.lad-words{font-size:15px}
+.w-up{color:var(--sand-ink)}.w-down{color:var(--cool-ink)}.w-normal{color:var(--muted)}
+@media (max-width:760px){
+  .lad-axis{grid-template-columns:1fr}
+  .lad-axis>span:not(.scale-ax){display:none}
+  .lad-row{grid-template-columns:1fr auto}
+  .lad-row .lad-track{grid-column:1/-1;order:3}
+  .lad-row .lad-words{grid-column:1/-1;order:4}
+}
+.theme-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0 32px;border-top:1px solid var(--rule)}
+.theme-links a{display:flex;flex-direction:column;gap:2px;padding:16px 0;border-bottom:1px solid var(--rule);text-decoration:none;color:inherit;min-height:44px}
+.theme-links b{font-family:var(--serif);font-weight:400;font-size:21px;color:var(--ink)}
+.theme-links span{font-size:14px;color:var(--muted)}
+
+/* themes */
+.theme-layout{display:flex;flex-wrap:wrap;gap:28px 44px;align-items:flex-start}
+.theme-nav{flex:1 1 200px;max-width:230px;display:flex;flex-direction:column}
+.theme-nav a{display:block;padding:10px 12px;min-height:44px;color:var(--text);text-decoration:none;border-radius:4px;font-size:15px}
+.theme-nav a:hover{background:#E3EDEC}
+.theme-nav a[aria-current="page"]{background:var(--ink);color:#fff;font-weight:700}
+.theme-main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:22px}
+.theme-head{display:flex;flex-direction:column;gap:8px;max-width:48em}
+.theme-head h1{font-size:40px;line-height:1.15}
+.theme-head p{margin:0;font-size:17px}
+.area-pick{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px;color:var(--muted)}
+.area-pick select{min-height:44px}
+.cards{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.cards:empty{display:none}
+.card{border-radius:6px;border-color:var(--rule)}
+.card .label{font-size:14px;letter-spacing:0;text-transform:none;color:var(--ink);font-weight:700}
+.card .where{color:var(--muted)}
+.card .value{color:var(--ink)}
+.card .badge,.fc .lab,.stat .k,th{letter-spacing:0;text-transform:none}
+.card .badge{font-size:12px}
+.fc .lab{font-size:12px}
+th{font-size:13px}
+.stat .k{font-size:13px}
+.chip.up{color:var(--sand-ink)}
+.chip.down{color:var(--cool-ink);background:var(--cool-bg);border-color:#BCD0EA}
+select{min-height:40px;border-radius:4px;border-color:#9DB5B5}
+.btn{border-radius:22px;min-height:44px;padding:0 16px;display:inline-flex;align-items:center;text-decoration:none;background:var(--teal-ink)}
+.btn.secondary{color:var(--teal-ink);border:1.5px solid var(--teal-ink);background:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.seg button[aria-pressed="true"]{background:var(--ink)}
+
+/* measurement rows */
+.mrows{background:#fff;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.mrows:has(#rows:empty){display:none}
+.mrow-head,.mrow{display:grid;grid-template-columns:minmax(160px,1.3fr) 118px minmax(140px,1fr) minmax(170px,1.6fr) minmax(170px,1.4fr);gap:6px 20px;align-items:center}
+.mrow-head{padding:12px 20px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--rule)}
+.mrow-head .r{text-align:right}
+.msub{padding:16px 20px 6px;font-family:var(--serif);font-size:19px;color:var(--ink);border-bottom:1px solid var(--grid);background:#FBFDFC}
+.mrow{width:100%;padding:12px 20px;border:0;border-bottom:1px solid var(--grid);background:#fff;text-align:left;color:inherit;min-height:64px}
+.mrow:hover{background:#F7FAF9}
+.mrow[aria-expanded="true"]{background:#F2F8F7;box-shadow:inset 4px 0 0 var(--teal-ink)}
+.mrow .nm b{display:block;color:var(--ink)}
+.mrow .nm span{display:block;font-size:13px;color:var(--muted)}
+.mrow .vl{text-align:right;font-variant-numeric:tabular-nums}
+.mrow .vl b{color:var(--ink);font-size:20px}
+.mrow .vl span{font-size:14px;color:var(--muted)}
+.mrow .ch{font-size:14px}
+.mrow .ch i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.mrow .sp svg{display:block;width:100%;height:40px}
+.mrow .sp .open{font-size:13px;color:var(--teal-ink)}
+.mrow .fc5{display:flex;justify-content:space-between;gap:4px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mrow .fc5 span{display:flex;flex-direction:column;align-items:center}
+.mrow .fc5 b{color:var(--ink);font-size:13px}
+.mrow .fc5 svg{width:16px;height:16px}
+.mrow .dash{color:var(--muted);font-size:13px}
+.chart-inline{padding:18px 20px 20px;border-bottom:1px solid var(--rule);background:#FBFDFC}
+.mrows .chart-inline:last-child{border-bottom:0}
+#theme-main-chart-host .chart-inline{border:1px solid var(--rule);border-radius:6px}
+@media (max-width:860px){
+  .mrow-head{display:none}
+  .mrow{grid-template-columns:1fr auto}
+  .mrow .ch,.mrow .sp,.mrow .fc5{grid-column:1/-1}
+  .mrow .sp svg{height:34px}
+}
+.chart-box svg{min-width:620px}
+@media (max-width:640px){
+  .wrap{padding:0 16px 48px}
+  .top-in{padding:10px 16px}
+  .brand .name{font-size:19px}
+  .section-head h2{font-size:26px}
+  .theme-head h1{font-size:32px}
+  .theme-nav{max-width:none;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -16px;padding:0 16px 4px}
+  .theme-nav a{flex:0 0 auto;border:1px solid var(--rule);border-radius:22px;padding:10px 14px}
+  .ladder{padding:4px 14px 8px}
+}
+/* compare */
+.cmp-controls{display:flex;flex-direction:column;gap:14px;padding:18px 22px}
+.cmp-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.cmp-line .lbl{font-size:14px;color:var(--muted);margin-right:6px}
+.cmp-presets,.cmp-evs{display:flex;flex-wrap:wrap;gap:8px}
+.cmp-presets button{min-height:44px;padding:6px 14px;border:1.5px solid #9DB5B5;background:#fff;color:var(--ink);border-radius:22px;font-size:14px}
+.cmp-presets button[aria-pressed="true"]{border-color:var(--teal-ink);background:#E3F3EF}
+.cmp-evs button{min-height:44px;padding:6px 12px;border:1.5px solid var(--rule);background:#F4F8F8;color:var(--ink);border-radius:4px;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.cmp-evs button[aria-pressed="true"]{background:#fff;border-color:var(--ink)}
+.cmp-evs button i{display:inline-block;width:14px;height:14px;border-radius:2px;opacity:.35}
+.cmp-evs button[aria-pressed="true"] i{opacity:1}
+.cmp-fields{display:flex;flex-wrap:wrap;gap:14px 24px;padding-top:14px;border-top:1px solid var(--grid)}
+.cmp-fields label,.cmp-fields .fld{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted);flex:1 1 220px;min-width:0}
+.cmp-fields select{min-height:44px;width:100%}
+.cmp-fields .seg{width:max-content;max-width:100%;flex-wrap:nowrap;overflow-x:auto}
+.cmp-fields .seg button{white-space:nowrap}
+.cmp-fields .fld{flex-basis:300px}
+.cmp-fields .seg button{min-height:42px}
+.lk{display:inline-block;width:22px;border-top:3px solid;vertical-align:middle;margin-right:8px}
+.lk.a{border-color:#1F6F8B}.lk.b{border-color:#C2571A}
+.chk{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);min-height:44px;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--teal-ink)}
+.cmp-chart{margin:22px 0 0;padding:18px 22px 14px}
+.cmp-chart .chart-box svg{min-width:760px}
+.cmp-analysis{display:flex;flex-wrap:wrap;gap:22px;margin-top:22px}
+.cmp-analysis .panel{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:10px;padding:18px 22px}
+.cmp-analysis h3{font-size:21px}
+.cmp-analysis .sub{margin:0;font-size:14px;color:var(--muted)}
+.cmp-analysis svg{display:block;width:100%;max-width:720px;height:auto}
+.cmp-analysis dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:14px;padding:12px 0;border-top:1px solid var(--grid);border-bottom:1px solid var(--grid)}
+.cmp-analysis dt{color:var(--muted)}
+.cmp-analysis dd{margin:0;color:var(--ink);font-variant-numeric:tabular-nums}
+.cmp-analysis .keyrow{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.cmp-analysis .keyrow i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.cmp-analysis table{min-width:0}
+.cmp-empty{padding:20px 22px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 
 </head>
 <body>
-<div class="wrap">
-  <div id="sample" class="sample" hidden>
-    <strong>Example data.</strong> This preview uses made-up values in the real data format, so the layout can be reviewed. The live page reads the data published by the harvester each morning.
+<a class="skip" href="#main">Skip to the data</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#today">
+      <span class="org">The Nautilus Project</span>
+      <span class="name">Gibraltar Ocean Observatory</span>
+    </a>
+    <nav class="mainnav" aria-label="Observatory">
+      <a href="#today" data-view="today">Today</a>
+      <a href="#theme/temp" data-view="theme">Themes</a>
+      <a href="#compare" data-view="compare">Compare</a>
+      <a href="#about" data-view="about">About the data</a>
+    </nav>
   </div>
-
-  <header class="hero">
-    <div>
-      <div class="eyebrow">The Nautilus Project · Ocean Observatory</div>
-      <h1>Gibraltar's waters today</h1>
-      <p>Satellite, model and weather-station data for the seas around the Rock, updated every morning and compared with what's normal for the time of year.</p>
-    </div>
-    <div class="hero-row">
-      <div class="areas" role="group" aria-labelledby="areas-label">
-        <span class="areas-label" id="areas-label">Sea area for satellite data</span>
-      </div>
-      <div class="updated" id="updated">Loading the latest data…</div>
-    </div>
-  </header>
-
+</header>
+<div class="wrap" id="main">
+  <div id="sample" class="sample" hidden>
+    <strong>Example data.</strong> This preview uses made-up values in the real data format, so the layout can be reviewed. The live page reads the data the harvester publishes each morning.
+  </div>
   <div id="dust-alert" class="alert" hidden role="status"></div>
 
-  <section class="section" aria-labelledby="today-h">
-    <div class="section-head">
-      <h2 id="today-h">Today's conditions</h2>
-      <p>Each card shows the most recent value and how it compares with the same time of year across the whole record. Select a card to see its chart.</p>
-    </div>
-    <div class="tabs" role="tablist" aria-label="Type of measurement" id="tabs"></div>
-    <p class="group-intro" id="group-intro"></p>
-    <div class="cards" id="cards" role="tabpanel" aria-labelledby="tab-physical"><div class="loading">Loading…</div></div>
-  </section>
-
-  <section class="section" id="chart-section" aria-labelledby="chart-h">
-    <div class="section-head">
-      <h2 id="chart-h">Through the year</h2>
-      <p>The shaded band is the average ±1 standard deviation for each day of the year. The dashed lines are the highest and lowest values recorded for that time of year.</p>
-    </div>
-    <div class="panel">
-      <div class="toolbar">
-        <div class="seg" role="group" aria-label="Chart view">
-          <button type="button" id="mode-season" aria-pressed="true">This year against normal</button>
-          <button type="button" id="mode-record" aria-pressed="false">Full record</button>
+  <section id="view-today" class="view" aria-labelledby="headline">
+    <div class="hero">
+      <div class="hero-text">
+        <p class="dateline" id="dateline">Loading the latest data</p>
+        <h1 id="headline">Gibraltar's waters today</h1>
+        <p class="lede" id="lede"></p>
+        <dl class="keyvals" id="keyvals"></dl>
+        <div class="areas" role="group" aria-labelledby="areas-label">
+          <p class="areas-label" id="areas-label">Sea area for the satellite readings. Choose one here or on the map.</p>
         </div>
-        <label for="year-select" id="year-label">Year <select id="year-select"></select></label>
-        <label for="var-select">Measurement <select id="var-select"></select></label>
-        <label for="source-select" id="source-label" hidden>Data source <select id="source-select"></select></label>
       </div>
-      <div class="chart-title">
-        <h3 id="chart-name">—</h3>
-        <span class="sub" id="chart-sub"></span>
-      </div>
-      <ul class="legend" id="legend"></ul>
-      <div class="chart-box" id="chart-box">
-        <svg id="chart" viewBox="0 0 960 400" role="img" aria-labelledby="chart-name chart-sub"></svg>
-        <div class="tip" id="tip" hidden></div>
-      </div>
-      <div class="stats" id="stats"></div>
-      <div class="actions">
-        <p class="note" id="chart-note"></p>
-        <button type="button" class="btn secondary" id="download">Download this series (CSV)</button>
-      </div>
+      <figure class="map">
+        <div id="map"></div>
+        <figcaption class="map-key" id="map-key"></figcaption>
+      </figure>
     </div>
+
+    <section class="section" aria-labelledby="away-h">
+      <div class="section-head">
+        <h2 id="away-h">Away from normal today</h2>
+        <p>Every measurement with a reading in the last 10 days, most unusual first. The scale is in standard deviations (SD) from the average for the date, so measurements in different units can sit side by side. The shaded band is ±1 SD, the normal range. Select a line to see its chart.</p>
+      </div>
+      <div class="panel ladder" id="ladder"><div class="loading">Loading</div></div>
+      <div class="actions"><span class="note" id="ladder-note"></span><button type="button" class="btn secondary" id="ladder-more" hidden>Show every measurement</button></div>
+    </section>
+
+    <section class="section" aria-labelledby="themes-h">
+      <div class="section-head"><h2 id="themes-h">Look closer</h2></div>
+      <div class="theme-links" id="theme-links"></div>
+    </section>
   </section>
 
-  <section class="section" id="dust-section" aria-labelledby="dust-h">
+  <section id="view-theme" class="view" aria-labelledby="theme-title" hidden>
+    <div class="theme-layout">
+      <nav class="theme-nav" id="theme-nav" aria-label="Themes"></nav>
+      <div class="theme-main">
+        <div class="theme-head">
+          <h1 id="theme-title"></h1>
+          <p id="theme-intro"></p>
+          <label class="area-pick" id="area-pick">Sea area <select id="area-select"></select></label>
+        </div>
+        <div class="cards" id="cards"></div>
+        <div class="mrows" id="rows-wrap">
+          <div class="mrow-head" aria-hidden="true"><span>Measurement</span><span class="r">Latest</span><span>Against normal</span><span>Last 60 days (shading: normal range)</span><span>Next 5 days</span></div>
+          <div id="rows"></div>
+        </div>
+        <div id="chart-section" class="chart-inline" hidden>
+          <div class="toolbar">
+            <div class="seg" role="group" aria-label="Chart view">
+              <button type="button" id="mode-season" aria-pressed="true">This year against normal</button>
+              <button type="button" id="mode-record" aria-pressed="false">Whole record</button>
+            </div>
+            <label for="year-select" id="year-label">Year <select id="year-select"></select></label>
+            <label for="var-select">Measurement <select id="var-select"></select></label>
+            <label for="source-select" id="source-label" hidden>Data source <select id="source-select"></select></label>
+          </div>
+          <div class="chart-title">
+            <h3 id="chart-name">Chart</h3>
+            <span class="sub" id="chart-sub"></span>
+          </div>
+          <ul class="legend" id="legend"></ul>
+          <div class="chart-box" id="chart-box">
+            <svg id="chart" viewBox="0 0 960 420" role="img" aria-labelledby="chart-name chart-sub"></svg>
+            <div class="tip" id="tip" hidden></div>
+          </div>
+          <div class="stats" id="stats"></div>
+          <div class="actions">
+            <p class="note" id="chart-note"></p>
+            <div class="btns">
+              <a class="btn secondary" id="compare-this" href="#compare">Compare with another measurement</a>
+              <button type="button" class="btn secondary" id="download">Download this series (CSV)</button>
+            </div>
+          </div>
+        </div>
+        <section class="section" id="dust-section" aria-labelledby="dust-h">
     <div class="section-head">
       <h2 id="dust-h">Saharan dust episodes</h2>
       <p>Dust blown north from the Sahara can carry iron and other nutrients to the sea surface. For each episode we compare chlorophyll, light attenuation (KD490) and light in the week before with the week after, averaged over the 20&nbsp;km box around Gibraltar.</p>
@@ -306,8 +542,7 @@ details ul{padding-left:18px;margin:8px 0}
     </div>
     <div class="actions"><span></span><button type="button" class="btn secondary" id="dust-more" hidden>Show all episodes</button></div>
   </section>
-
-  <section class="section" id="events-section" aria-labelledby="events-h">
+        <section class="section" id="events-section" aria-labelledby="events-h">
     <div class="section-head">
       <h2 id="events-h">Blooms and upwelling</h2>
       <p>A bloom is 3 or more days with chlorophyll in the top 10% for the time of year. We note an upwelling event, Saharan dust or a marine heatwave in the 10 days before a bloom as a possible trigger. That shows timing, not proof of cause.</p>
@@ -321,46 +556,7 @@ details ul{padding-left:18px;margin:8px 0}
       </table>
     </div>
   </section>
-
-  <section class="section" id="wildlife-section" aria-labelledby="wildlife-h" hidden>
-    <div class="section-head">
-      <h2 id="wildlife-h">What people are seeing</h2>
-      <p>Every sighting reported through NEMO inside the area this dashboard covers. Positions are rounded to a 1&nbsp;km square, and whales, dolphins and turtles are shown without a position at all.</p>
-      <p class="note" id="wfresh"></p>
-    </div>
-    <div class="panel">
-      <div class="scroll"><div class="wcal" id="wcal" role="img" aria-label="Sightings by group and month"></div></div>
-      <div class="scale"><span>Fewer</span><i style="background:#EAF4F8"></i><i style="background:#BFE0EE"></i><i style="background:#76CCF9"></i><i style="background:#0074A6"></i><i style="background:#034560"></i><span>More</span><span style="margin-left:auto" id="wcal-note"></span></div>
-    </div>
-    <div class="table-wrap" style="margin-top:12px">
-      <table>
-        <caption class="note" style="caption-side:bottom;text-align:left;padding:10px 12px" id="wsight-caption"></caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">Species</th><th scope="col">Group</th><th scope="col">Where</th><th scope="col">Verified</th></tr></thead>
-        <tbody id="wsight-rows"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="section" id="strandings-section" aria-labelledby="strandings-h" hidden>
-    <div class="section-head">
-      <h2 id="strandings-h">Strandings</h2>
-      <p id="strandings-intro"></p>
-    </div>
-    <div class="panel">
-      <div class="scroll"><div class="wcal" id="scal" role="img" aria-label="Strandings by month"></div></div>
-      <div class="scale"><span>Fewer</span><i style="background:#EAF4F8"></i><i style="background:#BFE0EE"></i><i style="background:#76CCF9"></i><i style="background:#0074A6"></i><i style="background:#034560"></i><span>More</span><span style="margin-left:auto" id="scal-note"></span></div>
-    </div>
-    <div class="table-wrap" style="margin-top:12px">
-      <table>
-        <caption class="note" style="caption-side:bottom;text-align:left;padding:10px 12px" id="strand-caption"></caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">Species</th><th scope="col">Kind</th>
-          <th scope="col">Where</th><th scope="col">Condition</th></tr></thead>
-        <tbody id="strand-rows"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="section" id="watch-section" aria-labelledby="watch-h" hidden>
+        <section class="section" id="watch-section" aria-labelledby="watch-h" hidden>
     <div class="section-head">
       <h2 id="watch-h">What makes a <span id="watch-name">sea sparkle</span> night?</h2>
       <p id="watch-intro"></p>
@@ -382,8 +578,51 @@ details ul{padding-left:18px;margin:8px 0}
     </div>
     <p class="note" id="watch-note"></p>
   </section>
+        <section class="section" id="wildlife-section" aria-labelledby="wildlife-h" hidden>
+    <div class="section-head">
+      <h2 id="wildlife-h">What people are seeing</h2>
+      <p>Every sighting reported through NEMO inside the area this dashboard covers. Positions are rounded to a 1&nbsp;km square, and whales, dolphins and turtles are shown without a position at all.</p>
+      <p class="note" id="wfresh"></p>
+    </div>
+    <div class="panel">
+      <div class="scroll"><div class="wcal" id="wcal" role="img" aria-label="Sightings by group and month"></div></div>
+      <div class="scale"><span>Fewer</span><i style="background:#EAF4F8"></i><i style="background:#BFE0EE"></i><i style="background:#76CCF9"></i><i style="background:#0074A6"></i><i style="background:#034560"></i><span>More</span><span style="margin-left:auto" id="wcal-note"></span></div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <caption class="note" style="caption-side:bottom;text-align:left;padding:10px 12px" id="wsight-caption"></caption>
+        <thead><tr><th scope="col">Date</th><th scope="col">Species</th><th scope="col">Group</th><th scope="col">Where</th><th scope="col">Verified</th></tr></thead>
+        <tbody id="wsight-rows"></tbody>
+      </table>
+    </div>
+  </section>
+        <section class="section" id="strandings-section" aria-labelledby="strandings-h" hidden>
+    <div class="section-head">
+      <h2 id="strandings-h">Strandings</h2>
+      <p id="strandings-intro"></p>
+    </div>
+    <div class="panel">
+      <div class="scroll"><div class="wcal" id="scal" role="img" aria-label="Strandings by month"></div></div>
+      <div class="scale"><span>Fewer</span><i style="background:#EAF4F8"></i><i style="background:#BFE0EE"></i><i style="background:#76CCF9"></i><i style="background:#0074A6"></i><i style="background:#034560"></i><span>More</span><span style="margin-left:auto" id="scal-note"></span></div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <caption class="note" style="caption-side:bottom;text-align:left;padding:10px 12px" id="strand-caption"></caption>
+        <thead><tr><th scope="col">Date</th><th scope="col">Species</th><th scope="col">Kind</th>
+          <th scope="col">Where</th><th scope="col">Condition</th></tr></thead>
+        <tbody id="strand-rows"></tbody>
+      </table>
+    </div>
+  </section>
+      </div>
+    </div>
+  </section>
 
-  <section class="section" aria-labelledby="about-h">
+  <section id="view-compare" class="view" aria-labelledby="compare-h" hidden>
+    <!--COMPARE-->
+  </section>
+
+  <section class="section about" id="about" aria-labelledby="about-h">
     <div class="section-head"><h2 id="about-h">About the data</h2></div>
     <details>
       <summary>What each measurement means</summary>
@@ -398,7 +637,7 @@ details ul{padding-left:18px;margin:8px 0}
           <li><strong>Salinity</strong>: saltiness in practical salinity units. Fresher Atlantic water (about 36.5) meets saltier Mediterranean water (38 and above) around Gibraltar.</li>
           <li><strong>Mixed layer depth</strong>: how deep the surface layer is stirred by wind and cooling. Deep winter mixing brings nutrients up; shallow summer layers trap plankton near the light.</li>
           <li><strong>Below the surface</strong>: sea temperature at 10, 20, 30, 50 and 100&nbsp;m, and salinity at 50, 100 and 200&nbsp;m, from the Copernicus physics model. Marine heatwaves are also worked out at 10, 30 and 50&nbsp;m, where seagrass, urchins and fish live.</li>
-          <li><strong>Atlantic–Mediterranean interface</strong>: fresher Atlantic water flows in over saltier Mediterranean water flowing out. We give the depth where salinity reaches 37.5, a common marker for the boundary between the two layers.</li>
+          <li><strong>Atlantic-Mediterranean interface</strong>: fresher Atlantic water flows in over saltier Mediterranean water flowing out. We give the depth where salinity reaches 37.5, a common marker for the boundary between the two layers.</li>
           <li><strong>Upwelling</strong>: westerly winds blowing along the Spanish Alboran coast push surface water offshore (Ekman transport), and cooler, nutrient-rich water rises to replace it. The index is the offshore transport per kilometre of coast, calculated from hourly wind at Gibraltar. An event is 2 or more days above 500&nbsp;m³/s per km, about a steady 6&nbsp;m/s westerly. A negative index means the opposite: an easterly Levanter pushing surface water towards the coast, which suppresses upwelling (downwelling). So the index swings either side of zero with the wind, and both signs are normal.</li>
           <li><strong>Light on the seabed</strong>: daily light reaching 5, 10, 15 and 20&nbsp;m, estimated from satellite PAR and KD490 using the Morel et al. (2007) relation between KD490 and the attenuation of PAR. It is an area average, so sheltered or turbid spots will differ.</li>
           <li><strong>Tide</strong>: times and heights of high and low water, predicted from a harmonic analysis of the last 12 months at the Gibraltar tide gauge, in local time and above chart datum, the level printed tide tables measure from. We work chart datum out from the gauge record itself as the lowest astronomical tide, using a separate harmonic fit for every year so the 18.6-year lunar cycle is covered; it can also be set to the published figure. The surge is the measured sea level minus the predicted tide: the effect of wind and air pressure, with slow drift removed so a serviced gauge cannot look like weather. Days whose level sits more than half a metre from their neighbours are dropped as sensor faults. Daily sea level is shown against the average of the past year rather than as a raw gauge height, because the gauge's own zero has moved over the record; it shows weather and season, not long-term sea level change. The moon phase is calculated for each day. Spring tides, with the biggest range, come a day or two after new and full moon, when the sun's and moon's pulls line up; neap tides, with the smallest range, follow the first and last quarter moons. The two-week strip shows each day's predicted range (highest high water minus lowest low water).</li>
@@ -434,7 +673,7 @@ details ul{padding-left:18px;margin:8px 0}
         <h3 style="font-size:16px">Biological</h3>
         <ul>
           <li><strong>Chlorophyll-a</strong>: the green pigment in phytoplankton, the microscopic plants at the base of the marine food web. Higher values mean more plankton.</li>
-          <li><strong>Plankton groups and sizes</strong>: satellite estimates of how the chlorophyll is split between diatoms, dinoflagellates and other groups, and between micro (&gt;20&nbsp;µm), nano (2–20&nbsp;µm) and pico (&lt;2&nbsp;µm) phytoplankton. Bigger cells tend to dominate in nutrient-rich water.</li>
+          <li><strong>Plankton groups and sizes</strong>: satellite estimates of how the chlorophyll is split between diatoms, dinoflagellates and other groups, and between micro (&gt;20&nbsp;µm), nano (2 to 20&nbsp;µm) and pico (&lt;2&nbsp;µm) phytoplankton. Bigger cells tend to dominate in nutrient-rich water.</li>
           <li><strong>Primary production</strong>: how much carbon phytoplankton fix through the whole water column each day, estimated from satellite chlorophyll, light and temperature.</li>
           <li><strong>Phytoplankton and zooplankton carbon</strong>: plankton biomass as carbon, from the biogeochemistry model.</li>
           <li><strong>Bloom watch</strong>: whether chlorophyll is in the top 10% for the time of year, how many times the normal level it is, and what happened in the days before each bloom.</li>
@@ -453,7 +692,7 @@ details ul{padding-left:18px;margin:8px 0}
         <p>For every day of the year we gather all values within 7 days either side, across every year in the record. From those we calculate the average, the standard deviation, and the lowest and highest values. A 15-day window smooths out gaps where cloud hides the sea from the satellites.</p>
         <p>"About normal" means within half a standard deviation of the average. "Slightly" is up to one standard deviation away, "much" is more than two.</p>
         <p>"Combined" uses the best available source for each day: reprocessed satellite data before near-real-time data, and ERA5 before the airport station for weather. Where a measurement has more than one source, the <em>Data source</em> menu shows one source on its own, with its own average and limits.</p>
-        <p>The marine heatwave level uses its own method: an 11-day window, the 90th percentile over 1991–2020 (or every year available if the record is shorter), smoothed over 31 days. Heatwaves are worked out from the combined SST series.</p>
+        <p>The marine heatwave level uses its own method: an 11-day window, the 90th percentile over 1991 to 2020 (or every year available if the record is shorter), smoothed over 31 days. Heatwaves are worked out from the combined SST series.</p>
         <p>Rain is ERA5 rainfall for the airport, with the Open-Meteo forecast filling the last few days. The 7- and 30-day totals are compared with the same days in every other year. Heavy rain is a day of 20 mm or more; a first flush is 10 mm or more after 30 days with less than 1 mm a day, when the first proper rain washes a dry catchment into the sea. Both are marked on the chlorophyll, clarity and nutrient charts, and listed as possible bloom triggers.</p>
         <p>Wind, wave and current directions go round in a circle, so they are charted as one dot per day with the share of easterly and westerly days, not an average and standard deviation.</p>
         <p>For satellite ocean colour (chlorophyll, KD490, plankton groups, CDOM and primary production) each day's value is the median of the cloud-free pixels in the area, so a few bad coastal pixels can't skew it. Values outside a physically possible range are discarded. Chlorophyll is naturally skewed, so its lower band edge is held at zero.</p>
@@ -465,7 +704,7 @@ details ul{padding-left:18px;margin:8px 0}
     </details>
   </section>
 
-  <p class="foot-note">Data are provided as they are received and may change when providers reprocess them. For research use, please cite the original providers listed above.</p>
+  <p class="foot-note">Data are published as received and can change when providers reprocess them. For research use, please cite the original providers listed above.</p>
 </div>
 
 <script>
@@ -492,7 +731,7 @@ const GROUPS = [
 ];
 const VARS = [
   // physical: sea temperature
-  {g:"physical", sub:"temp", v:"sst", title:"Sea Surface Temperature", short:"SST", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler"},
+  {g:"physical", sub:"temp", v:"sst", title:"Sea surface temperature", short:"SST", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler"},
   {g:"physical", sub:"temp", v:"mhw", special:"mhw", title:"Marine heatwave", loc:"area", chartVar:"sst"},
   {g:"physical", sub:"temp", v:"depth", special:"depth", title:"Below the surface", loc:"area", chartVar:"temp_30m"},
   {g:"physical", sub:"temp", v:"temp_10m", title:"Temperature at 10 m", loc:"area", unit:"°C", dp:1, up:"Warmer", down:"Cooler", model:true, card:false},
@@ -503,7 +742,7 @@ const VARS = [
   // physical: light and clarity
   {g:"physical", sub:"light", v:"par", title:"Light (PAR)", loc:"area", unit:"mol/m²/day", dp:0, up:"Brighter", down:"Duller", floor0:true, sat:true},
   {g:"physical", sub:"light", v:"seabed", special:"light", title:"Light on the seabed", loc:"area", chartVar:"par_10m"},
-  {g:"physical", sub:"light", v:"kd490", title:"Attenuation Coefficient (KD490)", short:"KD490", loc:"area", unit:"m⁻¹", dp:3, up:"Murkier", down:"Clearer", floor0:true, sat:true},
+  {g:"physical", sub:"light", v:"kd490", title:"Attenuation coefficient (KD490)", short:"KD490", loc:"area", unit:"m⁻¹", dp:3, up:"Murkier", down:"Clearer", floor0:true, sat:true},
   {g:"physical", sub:"light", v:"uv_index", title:"UV index", loc:"gibraltar_airport", where:"Gibraltar", unit:"", dp:1, up:"Stronger", down:"Weaker", floor0:true, threshold:8},
   {g:"physical", sub:"light", v:"bbp443", title:"Particle backscatter (443 nm)", loc:"area", unit:"m⁻¹", dp:4, up:"More particles", down:"Fewer particles", floor0:true, sat:true, card:false},
   {g:"physical", sub:"light", v:"par_5m", title:"Light reaching 5 m", loc:"area", unit:"mol/m²/day", dp:1, up:"Brighter", down:"Darker", floor0:true, sat:true, card:false},
@@ -521,7 +760,7 @@ const VARS = [
   {g:"physical", sub:"water", v:"salinity_50m", title:"Salinity at 50 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
   {g:"physical", sub:"water", v:"salinity_100m", title:"Salinity at 100 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
   {g:"physical", sub:"water", v:"salinity_200m", title:"Salinity at 200 m", loc:"area", unit:"PSU", dp:2, up:"Saltier", down:"Fresher", model:true, card:false},
-  {g:"physical", sub:"water", v:"interface_depth", title:"Atlantic–Mediterranean interface depth", loc:"area", unit:"m", dp:0, up:"Deeper", down:"Shallower", floor0:true, model:true, card:false},
+  {g:"physical", sub:"water", v:"interface_depth", title:"Atlantic-Mediterranean interface depth", loc:"area", unit:"m", dp:0, up:"Deeper", down:"Shallower", floor0:true, model:true, card:false},
   // physical: waves, tide and sea level
   {g:"physical", sub:"sea", v:"wave_hs", title:"Waves", loc:"europa_point", where:"Europa Point", unit:"m", dp:1, up:"Rougher", down:"Calmer", floor0:true},
   {g:"physical", sub:"sea", v:"wave_tp", title:"Wave period", loc:"europa_point", where:"Europa Point", unit:"s", dp:1, up:"Longer", down:"Shorter", floor0:true},
@@ -580,7 +819,7 @@ const VARS = [
   {g:"biological", sub:"community", v:"diatoms", title:"Diatoms", loc:"area", unit:"mg/m³", dp:3, up:"More diatoms", down:"Fewer diatoms", floor0:true, sat:true},
   {g:"biological", sub:"community", v:"dinoflagellates", title:"Dinoflagellates", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true},
   {g:"biological", sub:"community", v:"micro_phyto", title:"Microphytoplankton (>20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
-  {g:"biological", sub:"community", v:"nano_phyto", title:"Nanophytoplankton (2–20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
+  {g:"biological", sub:"community", v:"nano_phyto", title:"Nanophytoplankton (2 to 20 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
   {g:"biological", sub:"community", v:"pico_phyto", title:"Picophytoplankton (<2 µm)", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Less", floor0:true, sat:true, card:false},
   {g:"biological", sub:"community", v:"haptophytes", title:"Haptophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
   {g:"biological", sub:"community", v:"cryptophytes", title:"Cryptophytes", loc:"area", unit:"mg/m³", dp:3, up:"More", down:"Fewer", floor0:true, sat:true, card:false},
@@ -621,7 +860,7 @@ const fmtDate = d => new Date(d+"T00:00:00Z").toLocaleDateString("en-GB",{day:"n
 const fmtShort = d => new Date(d+"T00:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const fmt = (x, dp) => x == null || !isFinite(x) ? "–" : Number(x).toLocaleString("en-GB",{minimumFractionDigits:dp,maximumFractionDigits:dp});
+const fmt = (x, dp) => x == null || !isFinite(x) ? "n/a" : Number(x).toLocaleString("en-GB",{minimumFractionDigits:dp,maximumFractionDigits:dp});
 
 const cache = {};
 async function getJSON(path){
@@ -637,7 +876,7 @@ const store = {
 };
 
 const state = { area: store.get("area","gibraltar_20km"), variable: store.get("variable","sst"), mode:"season", year:null,
-  group: store.get("group","physical"),
+  theme: store.get("theme","temp"), view: null, themeShown: false,
   src: (() => { try { return JSON.parse(store.get("sources","{}")) || {}; } catch(e){ return {}; } })() };
 
 // The combined file lists any single-source alternatives; load the one chosen for this variable.
@@ -685,95 +924,67 @@ function compass(deg){
 }
 const ROMAN = ["","I","II","III","IV"];
 
-/* ---------------- group tabs ---------------- */
-function renderTabs(){
-  const box = $("tabs");
-  box.innerHTML = GROUPS.map(([code, name]) => {
-    return `<button type="button" role="tab" id="tab-${code}" aria-selected="${state.group === code}" tabindex="${state.group === code ? 0 : -1}" data-group="${code}">${name}</button>`;
-  }).join("");
-  const g = GROUPS.find(x => x[0] === state.group) || GROUPS[0];
-  $("group-intro").textContent = g[2];
-  $("cards").setAttribute("aria-labelledby", "tab-" + g[0]);
-  const tabs = [...box.querySelectorAll("button")];
-  tabs.forEach((b, i) => {
-    b.addEventListener("click", () => selectGroup(b.dataset.group));
-    b.addEventListener("keydown", e => {
-      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-      if (!d) return;
-      e.preventDefault();
-      const next = tabs[(i + d + tabs.length) % tabs.length];
-      selectGroup(next.dataset.group); $("tab-" + next.dataset.group).focus();
-    });
-  });
+/* ---------------- themes ---------------- */
+// The page is three views: Today (map and what is unusual), a page per theme, and Compare.
+// Every measurement belongs to one theme, worked out from its group and sub-group.
+const THEMES = [
+  ["temp", "Sea temperature", "At the surface from satellite, and down to 100 m from the Copernicus physics model.", ["temp"]],
+  ["light", "Light and clarity", "How much sunlight reaches the sea, how far it gets into the water, and the coloured material that dims it.", ["light", "organic"]],
+  ["water", "Currents and water masses", "Atlantic water flowing in over the Mediterranean, how well mixed the surface is, and upwelling on the Spanish coast.", ["water"]],
+  ["sea", "Waves, tide and sea level", "Waves off Europa Point, the tide at the harbour gauge, and sea level from satellite.", ["sea"]],
+  ["weather", "Weather and rain", "Wind drives the waves and upwelling. Rain washes nutrients and sediment off the land, which can cloud the water and feed a plankton bloom a week or two later.", ["weather"]],
+  ["chem", "Nutrients and carbon", "What phytoplankton need to grow, dissolved oxygen, and the carbonate chemistry behind ocean acidification. These come from the Copernicus biogeochemistry model, not water samples.", ["nutrients", "carbon"]],
+  ["air", "Saharan dust and air", "Dust blown north from the Sahara brings iron and other nutrients to the sea surface. The air quality readings are for Gibraltar.", ["air"]],
+  ["plankton", "Plankton", "How much phytoplankton there is, which groups and sizes dominate, and how fast it grows. Most values come from satellite.", ["amount", "community", "grazers"]],
+  ["wildlife", "Wildlife sightings", "What people report through NEMO: the public, schools and TNP teams. Counts follow how many people were out looking as much as what was in the water.", []],
+  ["traffic", "Fishing activity", "Fishing in the Strait, worked out by Global Fishing Watch from the AIS signals vessels broadcast. Boats without AIS do not show up.", []],
+];
+const THEME_BLURB = {temp:"Surface and depth, marine heatwaves", light:"Sunlight, KD490 and light on the seabed",
+  water:"Inflow, salinity, mixing and upwelling", sea:"Europa Point waves and the harbour tide",
+  weather:"Wind, gusts, pressure, rain and run-off", chem:"Nitrate, phosphate, oxygen and pH",
+  air:"Dust episodes and air quality", plankton:"Chlorophyll, blooms and who is there",
+  wildlife:"NEMO reports, jellyfish and sea sparkle", traffic:"Hours fished in the Strait"};
+function themeOf(cfg){
+  if (cfg.g === "wildlife") return "wildlife";
+  if (cfg.g === "traffic") return "traffic";
+  const t = THEMES.find(t => t[3].includes(cfg.sub));
+  return t ? t[0] : "temp";
 }
-// Which sections belong to which tab. A section listed here is only shown on its own tabs, so a
-// visitor on Chemical is not scrolling past strandings to reach the dust episodes. Sections not
-// listed (today's conditions, about the data) are always on.
-const SECTION_TABS = {
-  // The chart belongs to every tab that has daily series in it. Wildlife is the exception: its
-  // cards are counts and watches, with nothing to plot, so it is left out rather than showing an
-  // empty chart with an empty menu.
-  "chart-section": ["physical", "chemical", "biological", "traffic"],
-  "dust-section": ["chemical"],
-  "events-section": ["biological"],        // chlorophyll blooms and upwelling
-  "watch-section": ["biological"],         // what makes a sea sparkle night
+const themeName = id => (THEMES.find(t => t[0] === id) || [])[1] || "";
+function themeVars(id){ return CHART_VARS.filter(c => themeOf(c) === id); }
+function themeCards(id){ return VARS.filter(c => c.special && themeOf(c) === id); }
+const subName = code => { for (const g in SUBGROUPS){ const s = SUBGROUPS[g].find(x => x[0] === code); if (s) return s[1]; } return ""; };
+
+// Which sections belong to which theme.
+const SECTION_THEMES = {
+  "dust-section": ["air"],
+  "events-section": ["plankton", "water"],
+  "watch-section": ["plankton"],
   "wildlife-section": ["wildlife"],
   "strandings-section": ["wildlife"],
 };
-
-// A section is shown when it has something to show AND the tab it belongs to is open. Both halves
-// are decided here, in one place: two rules setting `hidden` from different directions is how a
-// section ends up appearing on the wrong tab.
 const sectionHasData = {};
-
-function setSectionData(id, hasData){
-  sectionHasData[id] = !!hasData;
-  applySectionVisibility();
-}
-
+function setSectionData(id, hasData){ sectionHasData[id] = !!hasData; applySectionVisibility(); }
 function applySectionVisibility(){
-  for (const [id, groups] of Object.entries(SECTION_TABS)){
+  for (const [id, themes] of Object.entries(SECTION_THEMES)){
     const el = $(id);
     if (!el) continue;
-    const ready = sectionHasData[id] !== false;      // unset means "always has something"
-    el.hidden = !(ready && groups.includes(state.group));
+    const ready = sectionHasData[id] !== false;
+    el.hidden = !(ready && themes.includes(state.theme));
   }
 }
 
-function groupVars(code){ return CHART_VARS.filter(c => c.g === code); }
-
 function fillVariableMenu(){
-  // Only this tab's measurements. Mixing every group into one menu is what made it long enough to
-  // need scrolling, and it let you sit on the Chemical tab looking at a chart of salinity.
-  const vs = $("var-select"), mine = groupVars(state.group);
-  const name = (GROUPS.find(g => g[0] === state.group) || [])[1] || "";
+  // this theme's measurements, in sub-groups
+  const vs = $("var-select"), mine = themeVars(state.theme);
   const opt = c => `<option value="${c.v}">${esc(c.title)}${c.model ? " (model)" : ""}</option>`;
-  const subs = subsOf(state.group);
-  vs.innerHTML = !mine.length ? ""
-    : subs.length
-      ? subs.map(([code, label]) => {
-          const inSub = mine.filter(c => c.sub === code);
-          return inSub.length ? `<optgroup label="${esc(label)}">${inSub.map(opt).join("")}</optgroup>` : "";
-        }).join("") + (mine.some(c => !subs.some(s => s[0] === c.sub))
-          ? `<optgroup label="Other">${mine.filter(c => !subs.some(s => s[0] === c.sub)).map(opt).join("")}</optgroup>` : "")
-      : `<optgroup label="${esc(name)}">${mine.map(opt).join("")}</optgroup>`;
-  // Changing tab with a variable the new tab does not have would leave the menu and the chart
-  // disagreeing, so fall back to the first measurement in the group.
-  if (mine.length && !mine.some(c => c.v === state.variable)){
-    state.variable = mine[0].v;
-    store.set("variable", state.variable);
-  }
+  const subs = [...new Set(mine.map(c => c.sub || ""))];
+  vs.innerHTML = subs.map(sb => `<optgroup label="${esc(subName(sb) || themeName(state.theme))}">${mine.filter(c => (c.sub || "") === sb).map(opt).join("")}</optgroup>`).join("");
+  if (mine.length && !mine.some(c => c.v === state.variable)) state.variable = mine[0].v;
   vs.value = state.variable;
 }
 
-function selectGroup(code){
-  if (state.group === code) return;
-  state.group = code; store.set("group", code);
-  renderTabs(); fillVariableMenu(); renderCards(); applySectionVisibility();
-  if (groupVars(code).length) renderChart();
-}
-
-/* ---------------- area buttons ---------------- */
+/* ---------------- area choice ---------------- */
 function renderAreas(){
   const box = document.querySelector(".areas");
   box.querySelectorAll("button").forEach(b => b.remove());
@@ -781,107 +992,389 @@ function renderAreas(){
     const b = document.createElement("button");
     b.type = "button"; b.id = "area-" + code; b.textContent = name;
     b.setAttribute("aria-pressed", String(code === state.area));
-    b.addEventListener("click", () => { state.area = code; store.set("area", code); renderAreas(); renderCards(); renderChart(); renderEvents(); });
+    b.addEventListener("click", () => setArea(code));
     box.appendChild(b);
   });
+  const sel = $("area-select");
+  sel.innerHTML = AREAS.map(([code, name]) => `<option value="${code}">${esc(name)}</option>`).join("");
+  sel.value = state.area;
+}
+function setArea(code){
+  if (state.area === code) return;
+  state.area = code; store.set("area", code);
+  renderAreas();
+  if (state.view === "today") renderToday();
+  if (state.view === "theme"){ renderTheme(); renderEvents(); }
+  if (state.view === "compare") renderCompare();
 }
 
-/* ---------------- cards ---------------- */
-async function renderCards(){
-  const box = $("cards");
-  const list = VARS.filter(c => c.g === state.group && c.card !== false);
-  const html = await Promise.all(list.map(async cfg => {
-    if (cfg.special === "mhw") return mhwCard(cfg);
-    if (cfg.special === "sizes") return sizesCard(cfg);
-    if (cfg.special === "depth") return depthCard(cfg);
-    if (cfg.special === "upwelling") return upwellingCard(cfg);
-    if (cfg.special === "tide") return tideCard(cfg);
-    if (cfg.special === "light") return lightCard(cfg);
-    if (cfg.special === "bloom") return bloomCard(cfg);
-    if (cfg.special === "sightings") return sightingsCard(cfg);
-    if (cfg.special === "watch") return watchCard(cfg);
-    if (cfg.special === "gelatinous") return gelatinousCard(cfg);
-    if (cfg.special === "invasive") return invasiveCard(cfg);
-    if (cfg.special === "strandings") return strandingsCard(cfg);
-    if (cfg.special === "rain") return rainCard(cfg);
-    if (cfg.special === "compass") return compassCard(cfg);
-    const loc = locFor(cfg);
-    let got = null;
-    try { got = await getSeries(cfg, loc); } catch(e){}
-    const l = got ? cardFromSeries(got.series) : null;
-    const where = whereFor(cfg, true);
-    if (!l) return `<button type="button" class="card empty" data-var="${cfg.v}" aria-current="${state.variable===cfg.v}">
-      <div class="label"><span>${cfg.title}${cfg.model ? '<span class="badge">Model</span>' : ""}</span><span class="where">${esc(where)}</span></div>
-      <div class="value">–</div><span class="chip normal">● Not available yet</span><p class="context">No data has been published for this yet.</p><span></span><div class="foot"><span></span></div></button>`;
-    const d = describe(cfg, l.z);
-    let context = "";
-    if (l.clim_mean != null) context = `Normal for ${fmtShort(l.date)}: ${fmt(l.clim_mean, cfg.dp)} ± ${fmt(l.clim_sd, cfg.dp)}`;
-    if (cfg.v === "kd490" && l.value > 0) context += `<br>1% of blue light reaches about ${fmt(4.6 / l.value, 0)} m`;
-    if (cfg.v === "wind_speed"){ const wd = latestFor("wind_dir", loc); if (wd) context = `${windName(wd.value)} · ` + context; }
-    if (cfg.v === "current_speed"){ const cd = latestFor("current_dir", loc); if (cd && cd.value != null) context = `Flowing ${compass(cd.value)} · ` + context; }
-    if (cfg.v === "wave_hs"){ const wd = latestFor("wave_dir", loc); if (wd && wd.value != null) context = `Coming from the ${compass(wd.value)} · ` + context; }
-    if (cfg.v === "wind_gust") context = `About ${fmt(l.value * 3.6, 0)} km/h${l.value >= 17.2 ? " (gale force)" : ""} · ` + context;
-    if (cfg.v === "slp"){
-      const rows = got.series.data, n = rows.length;
-      if (n > 1 && (Date.parse(rows[n-1][0]) - Date.parse(rows[n-2][0])) === 864e5)
-        context = `${signed(rows[n-1][1] - rows[n-2][1], 0)} hPa on the day before · ` + context;
-      // the inverse barometer: the sea stands about 1 cm higher for every hPa of lower pressure
-      if (l.clim_mean != null && l.value - l.clim_mean <= -5)
-        context += `<br>Low pressure is lifting the sea by about ${fmt(l.clim_mean - l.value, 0)} cm`;
-    }
-    const spark = sparkline(got.series, cfg) + await forecastStrip(cfg, loc);
-    const srcNote = got.choice ? ` · ${esc(got.choice.label)}` : "";
-    return `<button type="button" class="card" data-var="${cfg.v}" aria-current="${state.variable===cfg.v}">
-      <div class="label"><span>${cfg.title}${cfg.model ? '<span class="badge">Model</span>' : ""}</span><span class="where">${esc(where)}</span></div>
-      <div class="value num">${fmt(l.value, cfg.dp)}<span class="unit">${cfg.unit}</span></div>
-      <span class="chip ${d.cls}"><span aria-hidden="true">${d.icon}</span>${d.text}</span>
-      <p class="context num">${context}</p>
-      ${spark}
-      <div class="foot"><span>${fmtDate(l.date)}${srcNote}</span><span>Last 60 days</span></div>
-    </button>`;
-  }));
-  // headings for each sub-section, so related measurements read as one block
-  const subs = subsOf(state.group);
-  if (subs.length){
-    const out = []; let prev = null;
-    list.forEach((cfg, i) => {
-      if (cfg.sub !== prev){
-        const s = subs.find(x => x[0] === cfg.sub);
-        if (s) out.push(`<div class="subhead"><h3 id="sub-${s[0]}">${esc(s[1])}</h3><p>${esc(s[2])}</p></div>`);
-        prev = cfg.sub;
-      }
-      out.push(html[i]);
-    });
-    box.innerHTML = out.join("");
-  } else box.innerHTML = html.join("");
-  // A card with no chart behind it (the Wildlife counts) is not actionable unless it jumps.
-  const chartHere = (SECTION_TABS["chart-section"] || []).includes(state.group);
-  box.querySelectorAll(".card").forEach(c => {
-    if (!chartHere && !c.dataset.jump){ c.setAttribute("aria-disabled", "true"); c.tabIndex = -1; }
+/* ---------------- views and links ---------------- */
+// #today, #theme/<id>[/<measurement>], #compare?a=..&b=.., #about
+function parseHash(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith("theme/")){ const [, id, v] = h.split("/"); return {view:"theme", theme:id, variable:v}; }
+  if (h.startsWith("compare")) return {view:"compare", query:new URLSearchParams(h.split("?")[1] || "")};
+  if (h === "about") return {view:"about"};
+  return {view:"today"};
+}
+async function route(){
+  const r = parseHash();
+  if (r.view === "about"){ if (!state.view){ showView("today"); renderToday(); } $("about").scrollIntoView({block:"start"}); return; }
+  showView(r.view);
+  if (r.view === "today") renderToday();
+  if (r.view === "theme"){
+    const id = THEMES.some(t => t[0] === r.theme) ? r.theme : "temp";
+    const changed = id !== state.theme || !state.themeShown;
+    state.theme = id; store.set("theme", id); state.themeShown = true;
+    if (changed) await renderTheme();
+    if (r.variable) openChart(r.variable, true);
+    applySectionVisibility();
+  }
+  if (r.view === "compare") compareFromQuery(r.query);
+}
+function showView(v){
+  state.view = v;
+  ["today", "theme", "compare"].forEach(x => { $("view-" + x).hidden = x !== v; });
+  document.querySelectorAll(".mainnav a").forEach(a => {
+    if (a.dataset.view === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });
+  $("dust-alert").hidden = v !== "today" || !$("dust-alert").dataset.on;
+  if (v === "theme") document.querySelector('.mainnav a[data-view="theme"]').href = "#theme/" + (state.theme || "temp");
+}
+
+/* ---------------- theme page ---------------- */
+function cardHtml(cfg){
+  const f = {mhw:mhwCard, sizes:sizesCard, depth:depthCard, upwelling:upwellingCard, tide:tideCard, light:lightCard,
+    bloom:bloomCard, sightings:sightingsCard, watch:watchCard, gelatinous:gelatinousCard, invasive:invasiveCard,
+    strandings:strandingsCard, rain:rainCard, compass:compassCard}[cfg.special];
+  return f ? f(cfg) : "";
+}
+let themeToken = 0;
+async function renderTheme(){
+  const id = state.theme, t = THEMES.find(x => x[0] === id) || THEMES[0];
+  const token = ++themeToken;
+  $("theme-title").textContent = t[1];
+  $("theme-intro").textContent = t[2];
+  $("theme-nav").innerHTML = THEMES.map(x => `<a href="#theme/${x[0]}"${x[0] === id ? ' aria-current="page"' : ""}>${esc(x[1])}</a>`).join("");
+  // the area only matters where something is measured over a sea area
+  $("area-pick").hidden = ![...themeVars(id), ...themeCards(id)].some(c => c.loc === "area");
+  const cards = themeCards(id);
+  const html = await Promise.all(cards.map(c => cardHtml(c)));
+  if (token !== themeToken) return;
+  const box = $("cards");
+  box.innerHTML = html.join("");
   box.querySelectorAll(".card").forEach(c => c.addEventListener("click", () => {
     const cfg = VARS.find(x => x.v === c.dataset.var);
-    // some cards are a way in to a section further down rather than a chart to draw
-    if (c.getAttribute("aria-disabled") === "true") return;
     const jump = c.dataset.jump && $(c.dataset.jump);
-    if (jump && !jump.hidden){
-      jump.scrollIntoView({behavior:"smooth", block:"start"});
-      jump.querySelector("h2, h3")?.focus?.();
-      return;
-    }
+    if (jump && !jump.hidden){ jump.scrollIntoView({behavior:"smooth", block:"start"}); return; }
     let want = (cfg && cfg.chartVar) || c.dataset.var;
     if (cfg && cfg.chartFallback && meta && meta.series && !meta.series.includes(`${want}__${locFor(cfg)}`)) want = cfg.chartFallback;
-    state.variable = want; store.set("variable", state.variable);
-    box.querySelectorAll(".card").forEach(x => x.setAttribute("aria-current", String(x === c)));
-    $("var-select").value = state.variable;
-    renderChart();
-    $("chart-h").scrollIntoView({behavior:"smooth", block:"start"});
+    if (!CHART_VARS.some(x => x.v === want)) return;
+    openChart(want, true);
   }));
+  box.querySelectorAll(".card").forEach(c => {
+    const cfg = VARS.find(x => x.v === c.dataset.var);
+    if (!c.dataset.jump && !(cfg && cfg.chartVar)){ c.setAttribute("aria-disabled", "true"); c.tabIndex = -1; }
+  });
+  await renderRows(token);
+  applySectionVisibility();
+}
+
+const NEWEST = () => latest.length ? latest.map(l => l.date).sort().pop() : null;
+const staleDays = d => { const n = NEWEST(); return n && d ? (Date.parse(n) - Date.parse(d)) / 864e5 : 0; };
+function normDir(v){ return ((v % 360) + 360) % 360; }
+const dirShort = deg => ["N","NE","E","SE","S","SW","W","NW"][Math.round(normDir(deg) / 45) % 8];
+
+async function rowHtml(cfg){
+  const loc = locFor(cfg), where = whereFor(cfg, true);
+  const headline = cfg.card !== false;
+  let l = latestFor(cfg.v, loc), series = null;
+  if (headline || state.src[cfg.v]){
+    try { const got = await getSeries(cfg, loc); series = got.series; const c = cardFromSeries(series); if (c) l = Object.assign({}, l || {}, c); } catch(e){}
+  }
+  const name = `<span class="nm"><b>${esc(cfg.title)}</b><span>${esc(where || "")}${cfg.model ? ", model" : ""}</span></span>`;
+  if (!l || l.value == null)
+    return `<button type="button" class="mrow" data-var="${cfg.v}" aria-expanded="false">${name}<span class="vl"><span>no data yet</span></span><span class="ch w-normal">Not published yet</span><span class="sp"></span><span class="fc5"></span></button>`;
+  const old = staleDays(l.date) > 10;
+  let value, unit = cfg.unit || "", chip;
+  if (cfg.dir){
+    value = dirShort(l.value); unit = `${fmt(normDir(l.value), 0)}°`;
+    const nm = cfg.v === "wind_dir" ? windName(l.value) : (cfg.v === "hf_current_dir" ? "towards the " : "from the ") + compass(l.value);
+    chip = `<span class="ch w-normal">${esc(nm.charAt(0).toUpperCase() + nm.slice(1))}</span>`;
+  } else {
+    value = fmt(l.value, cfg.dp);
+    const d = describe(cfg, l.z);
+    const col = d.cls === "up" ? "var(--sand)" : d.cls === "down" ? "var(--cool)" : "#7C9298";
+    chip = `<span class="ch w-${d.cls}"><i style="background:${col}"></i>${d.text}</span>`;
+  }
+  if (old) chip = `<span class="ch w-normal">Last reading ${fmtDate(l.date)}</span>`;
+  let spark = `<span class="sp"><span class="open">Open the chart</span></span>`;
+  if (series && !cfg.dir){ const svg = sparkline(series, cfg); if (svg) spark = `<span class="sp">${svg}</span>`; }
+  let fc5 = `<span class="fc5"></span>`;
+  if (headline){
+    const fc = await getForecast(cfg.v, loc);
+    if (fc && fc.data.length) fc5 = `<span class="fc5">${fc.data.slice(0, 5).map(d => `<span>${fmtDay(d[0] + "T12:00:00Z")}<b>${cfg.dir ? dirShort(d[1]) : Number(d[1]).toFixed(cfg.dp)}</b></span>`).join("")}</span>`;
+  }
+  return `<button type="button" class="mrow" data-var="${cfg.v}" aria-expanded="false">${name}<span class="vl"><b>${value}</b> <span>${esc(unit)}</span></span>${chip}${spark}${fc5}</button>`;
+}
+async function renderRows(token){
+  const vars = themeVars(state.theme);
+  const chart = $("chart-section");
+  $("rows-wrap").after(chart); chart.hidden = true;            // park the chart while rows rebuild
+  if (!vars.length){ $("rows").innerHTML = ""; return; }
+  const html = await Promise.all(vars.map(rowHtml));
+  if (token !== themeToken) return;
+  const out = []; let prev = null;
+  const subs = new Set(vars.map(c => c.sub));
+  vars.forEach((cfg, i) => {
+    if (subs.size > 1 && cfg.sub !== prev){ out.push(`<div class="msub">${esc(subName(cfg.sub))}</div>`); prev = cfg.sub; }
+    out.push(html[i]);
+  });
+  $("rows").innerHTML = out.join("");
+  $("rows").querySelectorAll(".mrow").forEach(b => b.addEventListener("click", () => {
+    if (b.getAttribute("aria-expanded") === "true"){ closeChart(); return; }
+    openChart(b.dataset.var, false);
+  }));
+  fillVariableMenu();
+}
+function closeChart(){
+  const chart = $("chart-section");
+  chart.hidden = true;
+  $("rows").querySelectorAll(".mrow").forEach(r => r.setAttribute("aria-expanded", "false"));
+}
+function openChart(v, scroll){
+  if (!CHART_VARS.some(c => c.v === v)) return;
+  state.variable = v; store.set("variable", v);
+  const chart = $("chart-section");
+  const row = $("rows").querySelector(`.mrow[data-var="${v}"]`);
+  $("rows").querySelectorAll(".mrow").forEach(r => r.setAttribute("aria-expanded", String(r === row)));
+  if (row) row.after(chart); else $("rows-wrap").after(chart);
+  chart.hidden = false;
+  fillVariableMenu();
+  $("var-select").value = v;
+  $("compare-this").href = `#compare?a=${v}`;
+  renderChart();
+  const target = row || chart;
+  if (scroll) target.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+}
+
+/* ---------------- today: map, summary, away from normal ---------------- */
+const MAP = {W:640, H:600, lon0:-5.80, lon1:-4.90, lat0:35.78, lat1:36.46};
+const mapP = (lon, lat) => [(lon - MAP.lon0) / (MAP.lon1 - MAP.lon0) * MAP.W, (MAP.lat1 - lat) / (MAP.lat1 - MAP.lat0) * MAP.H];
+const mapPoly = pts => "M" + pts.map(p => mapP(p[0], p[1]).map(v => v.toFixed(1)).join(",")).join("L") + "Z";
+// simplified coastline, drawn by hand from the chart; good enough to place the sea areas
+const COAST = {
+  spain: [[-5.80,36.46],[-5.80,36.09],[-5.74,36.06],[-5.68,36.04],[-5.62,36.02],[-5.605,36.005],[-5.58,36.02],[-5.53,36.04],[-5.48,36.06],[-5.452,36.085],[-5.44,36.11],[-5.435,36.14],[-5.43,36.17],[-5.41,36.186],[-5.385,36.182],[-5.362,36.17],[-5.352,36.158],[-5.34,36.158],[-5.33,36.17],[-5.31,36.21],[-5.29,36.25],[-5.265,36.29],[-5.22,36.33],[-5.17,36.38],[-5.12,36.415],[-5.05,36.445],[-4.98,36.465],[-4.90,36.47],[-4.90,36.46]],
+  morocco: [[-5.80,35.78],[-5.80,35.795],[-5.75,35.815],[-5.68,35.83],[-5.60,35.84],[-5.55,35.852],[-5.50,35.888],[-5.46,35.912],[-5.42,35.912],[-5.38,35.902],[-5.345,35.896],[-5.322,35.902],[-5.298,35.896],[-5.31,35.882],[-5.33,35.866],[-5.342,35.845],[-5.35,35.82],[-5.36,35.78]],
+  rock: [[-5.355,36.158],[-5.362,36.14],[-5.358,36.122],[-5.349,36.109],[-5.341,36.112],[-5.338,36.126],[-5.336,36.142],[-5.340,36.158]],
+};
+// the same boxes the harvester averages over (config.yaml)
+const AREA_BOX = {
+  western_alboran: [-5.25, 35.90, -4.50, 36.40], strait_of_gibraltar: [-5.75, 35.85, -5.40, 36.05],
+  bay_of_gibraltar: [-5.45, 36.07, -5.35, 36.18], gibraltar_eastside: [-5.34, 36.08, -5.27, 36.18],
+  gibraltar_20km: [-5.50, 36.00, -5.20, 36.25],
+};
+const AREA_LABEL = {
+  strait_of_gibraltar: {lon:-5.575, lat:36.005, text:"Strait of Gibraltar", size:20},
+  western_alboran: {lon:-5.075, lat:36.08, text:"Western Alboran Sea", size:20},
+  bay_of_gibraltar: {lon:-5.405, lat:36.16, text:"Bay", size:14},
+  gibraltar_eastside: {lon:-5.262, lat:36.112, text:"Eastside", size:14, start:true},
+};
+const tintZ = z => { const a = Math.min(0.62, 0.12 + Math.abs(z) * 0.3).toFixed(2); return z >= 0 ? `rgba(185,119,30,${a})` : `rgba(47,109,176,${a})`; };
+function mapBox(b){ const p0 = mapP(b[0], b[3]), p1 = mapP(Math.min(b[2], MAP.lon1), b[1]); return {x:p0[0], y:p0[1], w:p1[0] - p0[0], h:p1[1] - p0[1]}; }
+function mapArrow(lon, lat, toDeg, len, h){
+  const e = mapP(lon, lat), r = toDeg * Math.PI / 180;
+  const s = [e[0] - len * Math.sin(r), e[1] + len * Math.cos(r)];
+  const a1 = r + Math.PI * 0.85, a2 = r - Math.PI * 0.85;
+  const f = p => p[0].toFixed(1) + "," + p[1].toFixed(1);
+  const stop = [e[0] - h * 0.6 * Math.sin(r), e[1] + h * 0.6 * Math.cos(r)];
+  return {line: "M" + f(s) + "L" + f(stop), head: "M" + f(e) + "L" + f([e[0] + h * Math.sin(a1), e[1] - h * Math.cos(a1)]) + "L" + f([e[0] + h * Math.sin(a2), e[1] - h * Math.cos(a2)]) + "Z", start: s};
+}
+function fresh(v, loc){ const l = latestFor(v, loc); return l && staleDays(l.date) <= 10 ? l : null; }
+
+function renderMap(){
+  const parts = [];
+  const sstZ = {};
+  Object.keys(AREA_BOX).forEach(code => { const l = fresh("sst", code); if (l && l.z != null) sstZ[code] = l; });
+  ["western_alboran", "strait_of_gibraltar", "bay_of_gibraltar", "gibraltar_eastside"].forEach(code => {
+    const b = mapBox(AREA_BOX[code]), l = sstZ[code];
+    parts.push(`<rect x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" fill="${l ? tintZ(l.z) : "none"}"/>`);
+  });
+  parts.push(`<path d="${mapPoly(COAST.spain)}" fill="#F6F8F4" stroke="#8FA9AA" stroke-width="1.2" stroke-linejoin="round"/>`);
+  parts.push(`<path d="${mapPoly(COAST.morocco)}" fill="#F6F8F4" stroke="#8FA9AA" stroke-width="1.2" stroke-linejoin="round"/>`);
+  parts.push(`<path d="${mapPoly(COAST.rock)}" fill="#C9D4C2" stroke="#6F8C80" stroke-width="1.2" stroke-linejoin="round"/>`);
+  // area outlines; the chosen area is dashed in teal. Clicking an area chooses it.
+  Object.keys(AREA_BOX).forEach(code => {
+    const b = mapBox(AREA_BOX[code]), on = code === state.area;
+    parts.push(`<rect class="area-hit" data-area="${code}" x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" fill="${code === "gibraltar_20km" ? "none" : "transparent"}" pointer-events="${code === "gibraltar_20km" ? "stroke" : "all"}" stroke="${on ? "#0B7A6B" : "#5E8A93"}" stroke-width="${on ? 3 : 1}" ${on ? 'stroke-dasharray="8 5"' : ""}><title>${esc(areaName(code))}</title></rect>`);
+  });
+  // currents, wind and waves where they are measured
+  const inflow = fresh("hf_current_speed", "strait_of_gibraltar") || fresh("current_speed", "strait_of_gibraltar");
+  const inflowDir = fresh("hf_current_dir", "strait_of_gibraltar") || fresh("current_dir", "strait_of_gibraltar");
+  const labels = [];
+  if (inflow && inflowDir){
+    const a = mapArrow(-5.47, 35.935, normDir(inflowDir.value), 200, 16);
+    parts.push(`<path d="${a.line}" stroke="#1F6F8B" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.85"/><path d="${a.head}" fill="#1F6F8B" opacity="0.85"/>`);
+    labels.push([mapP(-5.73, 35.905), `Surface current ${fmt(inflow.value, 1)} m/s, flowing ${compass(inflowDir.value)}`, "#1F6F8B", "start"]);
+  }
+  const wd = fresh("wind_dir", "gibraltar_airport"), ws = fresh("wind_speed", "gibraltar_airport");
+  if (wd){
+    const a = mapArrow(-5.349, 36.151, normDir(wd.value) + 180, 70, 12);
+    parts.push(`<path d="${a.line}" stroke="#0E3A53" stroke-width="3" stroke-linecap="round" fill="none"/><path d="${a.head}" fill="#0E3A53"/>`);
+    labels.push([[a.start[0] + 6, a.start[1] - 8], `Wind from ${dirShort(wd.value)}${ws ? `, ${fmt(ws.value, 1)} m/s` : ""}`, "#0E3A53", "start"]);
+  }
+  const vd = fresh("wave_dir", "europa_point"), vh = fresh("wave_hs", "europa_point");
+  if (vd){
+    const a = mapArrow(-5.33, 36.09, normDir(vd.value) + 180, 64, 11);
+    parts.push(`<path d="${a.line}" stroke="#0E3A53" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 5" fill="none"/><path d="${a.head}" fill="#0E3A53"/>`);
+    labels.push([mapP(-5.325, 36.055), `Waves${vh ? ` ${fmt(vh.value, 1)} m` : ""} from ${dirShort(vd.value)}`, "#0E3A53", "start"]);
+  }
+  const air = mapP(-5.349, 36.151), eur = mapP(-5.33, 36.09);
+  parts.push(`<circle cx="${air[0].toFixed(1)}" cy="${air[1].toFixed(1)}" r="4.5" fill="#fff" stroke="#0E3A53" stroke-width="2"/>`);
+  parts.push(`<circle cx="${eur[0].toFixed(1)}" cy="${eur[1].toFixed(1)}" r="4.5" fill="#fff" stroke="#0E3A53" stroke-width="2"/>`);
+  // water names in italic, as on a chart, with today's temperature underneath
+  const g = [];
+  Object.entries(AREA_LABEL).forEach(([code, L]) => {
+    const p = mapP(L.lon, L.lat), l = sstZ[code];
+    const anchor = L.start ? "start" : "middle";
+    g.push(`<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" font-size="${L.size}" text-anchor="${anchor}">${L.text}</text>`);
+    if (l) g.push(`<text x="${p[0].toFixed(1)}" y="${(p[1] + (L.size > 14 ? 22 : 17)).toFixed(1)}" font-size="${L.size > 14 ? 14 : 12}" text-anchor="${anchor}" font-style="normal" font-family="var(--sans)">${fmt(l.value, 1)} °C</text>`);
+  });
+  const sp = mapP(-5.70, 36.32), mo = mapP(-5.72, 35.805), rk = mapP(-5.335, 36.192);
+  const plain = [`<text x="${sp[0].toFixed(1)}" y="${sp[1].toFixed(1)}" letter-spacing="0.08em">Spain</text>`, `<text x="${mo[0].toFixed(1)}" y="${mo[1].toFixed(1)}" letter-spacing="0.08em">Morocco</text>`,
+    `<text x="${rk[0].toFixed(1)}" y="${rk[1].toFixed(1)}" text-anchor="middle" font-weight="700" fill="#3C5A4E" stroke="#F6F8F4" stroke-width="3" paint-order="stroke">Gibraltar</text>`]
+    .concat(labels.map(([p, t, c, a]) => `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" fill="${c}" text-anchor="${a}" stroke="#F2F7F6" stroke-width="3" paint-order="stroke">${esc(t)}</text>`));
+  const km10 = 10 / (111.32 * Math.cos(36.1 * Math.PI / 180)) / (MAP.lon1 - MAP.lon0) * MAP.W;
+  const svg = `<svg viewBox="0 0 640 600" role="img" aria-label="Map of the Strait of Gibraltar, the Bay and the western Alboran Sea, with the sea areas shaded by sea temperature against normal">
+    ${parts.join("")}
+    <g font-family="var(--serif)" font-style="italic" fill="#0E3A53" stroke="#E6F0F0" stroke-width="3" paint-order="stroke">${g.join("")}
+      <text x="14" y="${mapP(-5.8, 35.96)[1].toFixed(1)}" font-size="16">Atlantic</text>
+      <text x="626" y="${mapP(-4.9, 35.86)[1].toFixed(1)}" font-size="16" text-anchor="end">Mediterranean</text></g>
+    <g font-family="var(--sans)" fill="#4F6873" font-size="13">${plain.join("")}</g>
+    <g transform="translate(600 40)"><path d="M0,-18 L7,6 L0,1 L-7,6 Z" fill="#0E3A53"/><text x="0" y="22" text-anchor="middle" font-family="var(--sans)" font-size="13" fill="#0E3A53">N</text></g>
+    <g transform="translate(500 572)" font-family="var(--sans)" font-size="12" fill="#4F6873"><path d="M0,-4L0,4M0,0L${km10.toFixed(1)},0M${km10.toFixed(1)},-4L${km10.toFixed(1)},4" stroke="#4F6873" stroke-width="1.5" fill="none"/><text x="${(km10 / 2).toFixed(1)}" y="-6" text-anchor="middle">10 km</text></g>
+  </svg>`;
+  $("map").innerHTML = svg;
+  $("map").querySelectorAll(".area-hit").forEach(r => r.addEventListener("click", () => setArea(r.dataset.area)));
+  const sw = [-1.8, -0.9, null, 0.9, 1.8].map(z => `<i style="background:${z == null ? "#D9EAEC;border:1px solid #B9CFD0" : tintZ(z)}"></i>`).join("");
+  $("map-key").innerHTML = `<span>Sea surface temperature against normal</span><span class="sw">${sw}</span><span>−2 to +2 standard deviations</span><span><svg width="26" height="10" aria-hidden="true"><line x1="0" x2="26" y1="5" y2="5" stroke="#0B7A6B" stroke-width="2.5" stroke-dasharray="6 4"/></svg> chosen area</span><span>Coastline simplified</span>`;
+}
+
+function strengthWord(ms){ return ms < 1.5 ? null : ms < 3.5 ? "light" : ms < 6 ? "moderate" : ms < 9 ? "fresh" : ms < 12 ? "strong" : "gale-force"; }
+const AREA_PHRASE = {gibraltar_20km:"the sea around Gibraltar", bay_of_gibraltar:"the Bay", gibraltar_eastside:"the Eastside", strait_of_gibraltar:"the Strait", western_alboran:"the western Alboran"};
+function summaryLines(){
+  const ws = fresh("wind_speed", "gibraltar_airport"), wd = fresh("wind_dir", "gibraltar_airport"), wg = fresh("wind_gust", "gibraltar_airport");
+  let wind = "";
+  if (ws){
+    const s = strengthWord(ws.value);
+    if (!s) wind = "Hardly any wind";
+    else {
+      const d = wd ? normDir(wd.value) : null;
+      const nm = d == null ? "wind" : d >= 45 && d <= 135 ? "Levanter" : d >= 225 && d <= 315 ? "Poniente" : `${windName(d)} wind`;
+      wind = `${/^[aeiou]/.test(s) ? "An" : "A"} ${s} ${nm}`;
+    }
+    if (wg && wg.z != null && wg.z >= 1) wind += " with strong gusts for the time of year";
+  }
+  // which sea area is furthest from normal
+  let sea = "";
+  const st = mhw && mhw[state.area] && mhw[state.area].status;
+  if (st && st.state === "heatwave") sea = `a marine heatwave in ${AREA_PHRASE[state.area]}`;
+  else {
+    const cands = Object.keys(AREA_PHRASE).map(c => [c, fresh("sst", c)]).filter(x => x[1] && x[1].z != null);
+    cands.sort((a, b) => Math.abs(b[1].z) - Math.abs(a[1].z));
+    if (cands.length && Math.abs(cands[0][1].z) >= 1) sea = `${AREA_PHRASE[cands[0][0]]} running ${cands[0][1].z > 0 ? "warm" : "cool"}`;
+    else if (cands.length) sea = "sea temperatures close to normal";
+  }
+  let head = wind && sea ? `${wind}, and ${sea}.` : wind ? `${wind}.` : sea ? `${sea.charAt(0).toUpperCase() + sea.slice(1)}.` : "Gibraltar's waters today";
+  const lede = [];
+  const s = fresh("sst", state.area);
+  if (s){
+    const an = s.clim_mean != null ? s.value - s.clim_mean : null;
+    lede.push(`Sea surface temperature in ${AREA_PHRASE[state.area]} is ${fmt(s.value, 1)} °C` + (an == null ? "." : Math.abs(s.z || 0) < 0.5 ? ", about normal for the date." : `, ${fmt(Math.abs(an), 1)} °C ${an > 0 ? "above" : "below"} normal for the date.`));
+  }
+  const b = blooms && blooms[state.area] && blooms[state.area].status;
+  if (b && b.state === "bloom") lede.push(`Chlorophyll has been in bloom for ${b.days} day${b.days === 1 ? "" : "s"}, at ${fmt(b.ratio, 1)} times the normal level.`);
+  const dustNow = fresh("dust_sfc", "gibraltar_airport");
+  if (dustNow && dustNow.value > DUST_THRESHOLD) lede.push(`Saharan dust is over Gibraltar.`);
+  if (rain && rain.status && rain.status.dry_days >= 30) lede.push(`It has not rained properly at the airport for ${rain.status.dry_days} days.`);
+  return {head, lede: lede.join(" ")};
+}
+
+function keyVals(){
+  const rows = [];
+  const s = latestFor("sst", state.area);
+  if (s) rows.push([`Sea, ${areaName(state.area, true)}`, `<b>${fmt(s.value, 1)} °C</b> ${chipWords({up:"Warmer", down:"Cooler"}, s)}`, s]);
+  const ws = latestFor("wind_speed", "gibraltar_airport"), wd = latestFor("wind_dir", "gibraltar_airport"), wg = latestFor("wind_gust", "gibraltar_airport");
+  if (ws) rows.push(["Wind, airport", `<b>${fmt(ws.value, 1)} m/s</b>${wd ? ` from the ${compass(wd.value)}` : ""}${wg ? `, gusts ${fmt(wg.value, 1)}` : ""}`, ws]);
+  const vh = latestFor("wave_hs", "europa_point"), vd = latestFor("wave_dir", "europa_point"), vt = latestFor("wave_tp", "europa_point");
+  if (vh) rows.push(["Waves, Europa Point", `<b>${fmt(vh.value, 1)} m</b>${vd ? ` from the ${compass(vd.value)}` : ""}${vt ? `, every ${fmt(vt.value, 1)} s` : ""}`, vh]);
+  const pr = latestFor("precip", "gibraltar_airport"), p7 = latestFor("precip_7d", "gibraltar_airport");
+  if (pr) rows.push(["Rain, airport", `<b>${fmt(pr.value, 1)} mm</b> on the day${p7 ? `, ${fmt(p7.value, 0)} mm over 7 days` : ""}`, pr]);
+  $("keyvals").innerHTML = rows.map(([k, v, l]) => `<dt>${k}</dt><dd>${v}${staleDays(l.date) > 1 ? ` <span class="old">(${fmtShort(l.date)})</span>` : ""}</dd>`).join("");
+}
+function chipWords(cfg, l){
+  if (l.z == null || l.clim_mean == null) return "";
+  const an = l.value - l.clim_mean;
+  if (Math.abs(l.z) < 0.5) return `<span class="w-normal">about normal</span>`;
+  return `<span class="${an > 0 ? "w-up" : "w-down"}">${fmt(Math.abs(an), 1)} ${an > 0 ? "above" : "below"} normal</span>`;
+}
+
+let showAllLadder = false;
+function ladderItems(){
+  const out = [];
+  CHART_VARS.forEach(cfg => {
+    if (cfg.dir || cfg.v === "precip") return;          // one day's rain is too skewed to score in SD
+    const loc = locFor(cfg), l = fresh(cfg.v, loc);
+    if (!l || l.z == null || !isFinite(l.z)) return;
+    out.push({cfg, l, loc});
+  });
+  out.sort((a, b) => Math.abs(b.l.z) - Math.abs(a.l.z));
+  return out;
+}
+function renderLadder(){
+  const items = ladderItems();
+  const shown = showAllLadder ? items : items.slice(0, 12);
+  const axis = `<div class="lad-axis"><span></span><span class="scale-ax"><span style="left:10%">−2 SD</span><span style="left:30%">−1</span><span class="n" style="left:50%">Normal</span><span style="left:70%">+1</span><span style="left:90%">+2 SD</span></span><span></span><span></span></div>`;
+  $("ladder").innerHTML = !items.length ? `<p class="note" style="padding:16px 0">Nothing to compare yet.</p>` : axis + shown.map(({cfg, l, loc}) => {
+    const z = Math.max(-2.4, Math.min(2.4, l.z)), pos = (z + 2.5) / 5 * 100;
+    const d = describe(cfg, l.z);
+    const col = d.cls === "up" ? "#B9771E" : d.cls === "down" ? "#2F6DB0" : "#7C9298";
+    return `<button type="button" class="lad-row" data-var="${cfg.v}">
+      <span class="lad-name"><b>${esc(cfg.title)}</b><span>${esc(whereFor(cfg) || "")}${cfg.model ? ", model" : ""}</span></span>
+      <span class="lad-track" aria-hidden="true"><span class="base"></span><span class="band"></span><span class="mid"></span>
+        <span class="bar" style="left:${Math.min(50, pos).toFixed(1)}%;width:${Math.abs(pos - 50).toFixed(1)}%;background:${col}"></span>
+        <span class="dot" style="left:${pos.toFixed(1)}%;background:${col};box-shadow:0 0 0 1px ${col}"></span></span>
+      <span class="lad-val"><b>${fmt(l.value, cfg.dp)} ${esc(cfg.unit || "")}</b><span>normal ${fmt(l.clim_mean, cfg.dp)}</span></span>
+      <span class="lad-words w-${d.cls}">${d.text} (${l.z > 0 ? "+" : "−"}${fmt(Math.abs(l.z), 1)} SD)</span>
+    </button>`;
+  }).join("");
+  $("ladder").querySelectorAll(".lad-row").forEach(b => b.addEventListener("click", () => {
+    const cfg = CHART_VARS.find(c => c.v === b.dataset.var);
+    location.hash = `#theme/${themeOf(cfg)}/${cfg.v}`;
+  }));
+  const more = $("ladder-more");
+  more.hidden = items.length <= 12;
+  more.textContent = showAllLadder ? "Show the 12 most unusual" : `Show all ${items.length} measurements`;
+  $("ladder-note").textContent = items.length ? `${areaName(state.area)} for satellite and model readings; fixed stations for the rest.` : "";
+}
+
+function renderToday(){
+  const newest = NEWEST();
+  const gen = meta && meta.generated_at ? new Date(meta.generated_at) : null;
+  $("dateline").textContent = newest ? `${new Date(newest + "T12:00:00Z").toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric", timeZone:"UTC"})}${gen ? `, updated at ${fmtTime(gen.toISOString())}` : ""}` : "";
+  const s = summaryLines();
+  $("headline").textContent = s.head;
+  $("lede").textContent = s.lede;
+  $("lede").hidden = !s.lede;
+  keyVals();
+  renderMap();
+  renderLadder();
+  $("theme-links").innerHTML = THEMES.map(t => `<a href="#theme/${t[0]}"><b>${esc(t[1])}</b><span>${esc(THEME_BLURB[t[0]])}</span></a>`).join("");
 }
 
 const fmtTime = iso => new Date(iso).toLocaleTimeString("en-GB", {hour:"2-digit", minute:"2-digit", timeZone:"Europe/Gibraltar"});
 const fmtDay = iso => new Date(iso).toLocaleDateString("en-GB", {weekday:"short", timeZone:"Europe/Gibraltar"});
-const signed = (x, dp) => x == null ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "") + fmt(Math.abs(x), dp);
+const signed = (x, dp) => x == null ? "n/a" : (x > 0 ? "+" : x < 0 ? "−" : "") + fmt(Math.abs(x), dp);
 async function getForecast(v, loc){
   const key = `${v}__${loc}`;
   if (!meta || !(meta.forecasts || []).includes(key)) return null;
@@ -1273,7 +1766,7 @@ function strandingsLogCard(cfg, L){
 function emptyCard(cfg, where, msg){
   return `<button type="button" class="card empty" data-var="${cfg.v}" aria-current="false">
     <div class="label"><span>${cfg.title}</span><span class="where">${esc(where)}</span></div>
-    <div class="value">–</div><span class="chip normal">● Not available yet</span><p class="context">${msg}</p><span></span><div class="foot"><span></span></div></button>`;
+    <div class="value">n/a</div><span class="chip normal">● Not available yet</span><p class="context">${msg}</p><span></span><div class="foot"><span></span></div></button>`;
 }
 function mhwCard(cfg){
   const where = whereFor(cfg, true);
@@ -1290,21 +1783,21 @@ function mhwCard(cfg){
     context = `It becomes a heatwave after 5 days in a row above ${fmt(st.thresh, 1)} °C.`;
   } else {
     chip = `<span class="chip normal"><span aria-hidden="true">●</span>No marine heatwave</span>`;
-    context = `Heatwave level for ${fmtShort(st.date)}: ${fmt(st.thresh, 1)} °C (warmest 10% of days, ${m.baseline[0]}–${m.baseline[1]}).`;
+    context = `Heatwave level for ${fmtShort(st.date)}: ${fmt(st.thresh, 1)} °C (warmest 10% of days, ${m.baseline[0]} to ${m.baseline[1]}).`;
   }
   const lastEv = evs.length ? evs[evs.length - 1] : null;
   const since = new Date(st.date + "T00:00:00Z"); since.setUTCFullYear(since.getUTCFullYear() - 1);
   const yearCount = evs.filter(e => new Date(e.end + "T00:00:00Z") >= since).length;
   return `<button type="button" class="card" data-var="${cfg.v}" aria-current="false">
     <div class="label"><span>${cfg.title}</span><span class="where">${esc(where)}</span></div>
-    <div class="value num">${anom == null ? "–" : (anom > 0 ? "+" : "") + fmt(anom, 1)}<span class="unit">°C against normal</span></div>
+    <div class="value num">${anom == null ? "n/a" : (anom > 0 ? "+" : "") + fmt(anom, 1)}<span class="unit">°C against normal</span></div>
     ${chip}
     <p class="context">${context}</p>
     <p class="context num">${yearCount} heatwave${yearCount === 1 ? "" : "s"} in the past 12 months, ${evs.length} since ${(m.first || st.date).slice(0,4)}.${lastEv && st.state !== "heatwave" ? ` Last: ${fmtShort(lastEv.start)} ${lastEv.start.slice(0,4)}, ${lastEv.days} days, ${esc(lastEv.category_name.toLowerCase())}.` : ""}</p>
     <div class="foot"><span>${fmtDate(st.date)}</span><span>Hobday method</span></div>
   </button>`;
 }
-const SIZE_PARTS = [["micro_phyto","Micro (>20 µm)","#034560"],["nano_phyto","Nano (2–20 µm)","#0074A6"],["pico_phyto","Pico (<2 µm)","#76CCF9"]];
+const SIZE_PARTS = [["micro_phyto","Micro (>20 µm)","#034560"],["nano_phyto","Nano (2 to 20 µm)","#0074A6"],["pico_phyto","Pico (<2 µm)","#76CCF9"]];
 async function sizesCard(cfg){
   const where = whereFor(cfg, true), loc = locFor(cfg);
   let parts;
@@ -1477,7 +1970,7 @@ async function rainCard(cfg){
   const srcNote = got.choice ? ` · ${esc(got.choice.label)}` : "";
   return `<button type="button" class="card" data-var="${cfg.v}" aria-current="${state.variable === cfg.chartVar}">
     <div class="label"><span>${cfg.title}</span><span class="where">${esc(where)}</span></div>
-    <div class="value num">${t7 == null ? "–" : fmt(t7, dp(t7))}<span class="unit">mm in 7 days</span></div>
+    <div class="value num">${t7 == null ? "n/a" : fmt(t7, dp(t7))}<span class="unit">mm in 7 days</span></div>
     <span class="chip ${d.cls}"><span aria-hidden="true">${d.icon}</span>${d.text}</span>
     <p class="context num">${lines.join("<br>")}</p>
     ${flag}
@@ -1538,7 +2031,7 @@ async function renderChart(){
   const ss = $("source-select");
   $("source-label").hidden = opts.length < 2;
   if (opts.length >= 2){
-    const yr = o => `${o.first.slice(0,4)}–${o.last.slice(0,4)}`;
+    const yr = o => `${o.first.slice(0,4)} to ${o.last.slice(0,4)}`;
     ss.innerHTML = `<option value="">Combined (best available)</option>` +
       opts.map(o => `<option value="${esc(o.source)}">${esc(o.label)} (${yr(o)})</option>`).join("");
     ss.value = got.choice ? got.choice.source : "";
@@ -1550,7 +2043,7 @@ async function renderChart(){
   $("year-label").hidden = state.mode !== "season";
   const unit = series.unit ? series.unit.replace("degC","°C").replace("uatm","µatm").replace("m-3","m⁻³").replace("m-1","m⁻¹").replace("m-2","m⁻²").replace("day-1","day⁻¹").replace("s-1","s⁻¹") : "";
   const used = (series.source_labels || series.sources).join(", ");
-  $("chart-sub").textContent = `${series.name}${unit && unit !== "1" ? ` (${unit})` : ""} · ${series.record.first.slice(0,4)}–${series.record.last.slice(0,4)} · ${got.choice ? "Source" : "Sources"}: ${used}`;
+  $("chart-sub").textContent = `${series.name}${unit && unit !== "1" ? ` (${unit})` : ""} · ${series.record.first.slice(0,4)} to ${series.record.last.slice(0,4)} · ${got.choice ? "Source" : "Sources"}: ${used}`;
   if (cfg.dir){ renderDirStats(series, cfg); drawDirection(svg, series, cfg); return; }
   renderStats(series, cfg);
   if (state.mode === "season") drawSeason(svg, series, cfg); else drawRecord(svg, series, cfg);
@@ -1565,15 +2058,23 @@ function renderStats(series, cfg){
     ["Highest recorded", fmt(r.max, dp), fmtDate(r.max_date)],
   ].map(s => `<div class="stat"><div class="k">${s[0]}</div><div class="v num">${s[1]}</div><div class="d num">${s[2]}</div></div>`).join("");
   const c = series.climatology;
-  $("chart-note").textContent = c ? `Normal range based on ${c.years} years (${c.first_year}–${c.last_year}), using a ${c.window_days}-day window for each day of the year.` : "Not enough years yet to work out a normal range.";
+  $("chart-note").textContent = c ? `Normal range based on ${c.years} years (${c.first_year} to ${c.last_year}), using a ${c.window_days}-day window for each day of the year.` : "Not enough years yet to work out a normal range.";
 }
 
 function legend(items){
   $("legend").innerHTML = items.map(([cls, style, label]) => `<li><span class="key ${cls}" style="${style}"></span>${label}</li>`).join("");
 }
 
+// axis title with units, used on every chart
+const niceUnit = u => !u ? "" : u.replace("degC","°C").replace("uatm","µatm").replace("ug m-3","µg/m³").replace("m-3","m⁻³").replace("m-1","m⁻¹").replace("m-2","m⁻²").replace("day-1","day⁻¹").replace("s-1","s⁻¹").replace("km-1","km⁻¹");
+function axisTitle(series){ const u = niceUnit(series.unit); return u && u !== "1" ? `${series.name} (${u})` : `${series.name} (no units)`; }
+function axisTitles(svg, f, yTitle, xTitle){
+  const cy = f.M.t + f.ih / 2;
+  el("text", {x:16, y:cy, transform:`rotate(-90 16 ${cy})`, "text-anchor":"middle", fill:"#2C4552", "font-size":13, "font-weight":700}, svg).textContent = yTitle;
+  el("text", {x:f.M.l + f.iw / 2, y:f.H - 8, "text-anchor":"middle", fill:"#2C4552", "font-size":13, "font-weight":700}, svg).textContent = xTitle;
+}
 function frame(svg, lo, hi){
-  const W = 960, H = 400, M = {l:56, r:118, t:22, b:34};
+  const W = 960, H = 420, M = {l:78, r:118, t:22, b:56};
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
   const {ticks} = niceTicks(lo, hi, 5);
   const y = v => M.t + ih - (v - lo) / (hi - lo) * ih;
@@ -1610,7 +2111,8 @@ function drawSeason(svg, series, cfg){
   const x = d => f.M.l + (d - 1) / 364 * f.iw;
   // month ticks
   const mStart = [1,32,60,91,121,152,182,213,244,274,305,335];
-  mStart.forEach((d, i) => el("text", {x:x(d+14), y:f.H-12, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = MONTHS[i]);
+  mStart.forEach((d, i) => el("text", {x:x(d+14), y:f.M.t+f.ih+20, "text-anchor":"middle", fill:"#4F6873", "font-size":12}, svg).textContent = MONTHS[i]);
+  axisTitles(svg, f, axisTitle(series), `Month (${yr})`);
   // dust days for this year
   const dustDays = [];
   if (dust) dust.episodes.forEach(ep => {
@@ -1654,7 +2156,7 @@ function drawSeason(svg, series, cfg){
     const placed = [];
     labels.sort((a,b) => b[0]-a[0]).forEach(l => { let yy = f.y(l[0]); placed.forEach(p => { if (Math.abs(p - yy) < 15) yy = p + 15; }); placed.push(yy); el("text", {x:f.M.l+f.iw+8, y:yy+4, fill:l[2], "font-size":12}, svg).textContent = l[1]; });
     items.push(["band","","Average ±1 standard deviation"],["","border-color:#545454","Average"],["dash","","Highest and lowest for the time of year"]);
-    if (heat) items.push(["dot","",`Marine heatwave level (90th percentile, ${heat.baseline[0]}–${heat.baseline[1]})`]);
+    if (heat) items.push(["dot","",`Marine heatwave level (90th percentile, ${heat.baseline[0]} to ${heat.baseline[1]})`]);
     if (bloom) items.push(["gdot","","Bloom level (90th percentile)"]);
   }
   if (cfg.v === "upwelling_index" && ov.up){
@@ -1691,7 +2193,7 @@ function drawSeason(svg, series, cfg){
     const rows = [];
     if (day) rows.push([yr, fmt(day[1], cfg.dp)]);
     else rows.push([yr, "no data"]);
-    if (c && c.mean[i] != null){ rows.push(["Average", fmt(c.mean[i], cfg.dp)]); if (c.sd[i] != null) rows.push(["±1 SD", `${fmt(Math.max(cfg.floor0?0:-Infinity, c.mean[i]-c.sd[i]), cfg.dp)} – ${fmt(c.mean[i]+c.sd[i], cfg.dp)}`]); if (c.min[i] != null) rows.push(["Range", `${fmt(c.min[i], cfg.dp)} – ${fmt(c.max[i], cfg.dp)}`]); }
+    if (c && c.mean[i] != null){ rows.push(["Average", fmt(c.mean[i], cfg.dp)]); if (c.sd[i] != null) rows.push(["±1 SD", `${fmt(Math.max(cfg.floor0?0:-Infinity, c.mean[i]-c.sd[i]), cfg.dp)} to ${fmt(c.mean[i]+c.sd[i], cfg.dp)}`]); if (c.min[i] != null) rows.push(["Range", `${fmt(c.min[i], cfg.dp)} to ${fmt(c.max[i], cfg.dp)}`]); }
     if (heat){ const k = (i + 1) >= 60 ? i + 1 : i; rows.push(["Heatwave level", fmt(heat.thresh[k], cfg.dp)]); }
     const fp = fpts.find(q => q[0] === i + 1);
     if (fp) rows.splice(day ? 1 : 0, day ? 0 : 1, ["Forecast", fmt(fp[1], cfg.dp)]);
@@ -1711,6 +2213,7 @@ function drawRecord(svg, series, cfg){
   if (!rows.length) return;
   let lo = r.min, hi = r.max; const pad = (hi-lo)*0.06 || 1; lo -= pad; hi += pad; if (cfg.floor0) lo = Math.max(0, lo);
   const f = frame(svg, lo, hi);
+  axisTitles(svg, f, axisTitle(series), "Year (daily values, with a 30-day running average)");
   const t0 = rows[0][0], t1 = rows[rows.length-1][0];
   const x = t => f.M.l + (t - t0) / (t1 - t0 || 1) * f.iw;
   const y0 = new Date(t0).getUTCFullYear(), y1 = new Date(t1).getUTCFullYear();
@@ -1718,7 +2221,7 @@ function drawRecord(svg, series, cfg){
   for (let yy = y0 + (y0 % stepY ? stepY - y0 % stepY : 0); yy <= y1; yy += stepY){
     const t = Date.UTC(yy,0,1); if (t < t0) continue;
     el("line", {x1:x(t), x2:x(t), y1:f.M.t+f.ih, y2:f.M.t+f.ih+5, stroke:"#C5D6DD"}, svg);
-    el("text", {x:x(t), y:f.H-12, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = yy;
+    el("text", {x:x(t), y:f.M.t+f.ih+20, "text-anchor":"middle", fill:"#4F6873", "font-size":12}, svg).textContent = yy;
   }
   const ov = (current && current.ov) || {};
   const heat = ov.heat, bloom = ov.bloom;
@@ -1786,16 +2289,17 @@ function renderDirStats(series, cfg){
     ["Most common", `${w.verb} ${DIR_NAMES[top]}`, `${pct(all.counts[top] / (all.n || 1))} of days on record`],
     [w.e, pct(all.east), state.mode === "season" ? `${pct(ys.east)} of days in ${state.year}` : "of days on record"],
     [w.w, pct(all.west), state.mode === "season" ? `${pct(ys.west)} of days in ${state.year}` : "of days on record"],
-    ["Days of data", fmt(all.n, 0), `${series.record.first.slice(0,4)}–${series.record.last.slice(0,4)}`],
+    ["Days of data", fmt(all.n, 0), `${series.record.first.slice(0,4)} to ${series.record.last.slice(0,4)}`],
   ].map(s => `<div class="stat"><div class="k">${s[0]}</div><div class="v num">${s[1]}</div><div class="d num">${s[2]}</div></div>`).join("");
-  $("chart-note").textContent = `Each dot is one day's average direction (${w.verb === "towards" ? "the way the water is flowing" : "the way it is coming from"}). East covers 45–135°, west 225–315°. Directions go round in a circle, so no average or standard deviation is shown.`;
+  $("chart-note").textContent = `Each dot is one day's average direction (${w.verb === "towards" ? "the way the water is flowing" : "the way it is coming from"}). East covers 45° to 135°, west 225° to 315°. Directions go round in a circle, so no average or standard deviation is shown.`;
 }
 function drawDirection(svg, series, cfg){
   const season = state.mode === "season", yr = state.year;
-  const W = 960, H = 400, M = {l:56, r:118, t:22, b:34};
+  const W = 960, H = 420, M = {l:78, r:118, t:22, b:56};
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
   const y = v => M.t + ih - v / 360 * ih;
   const f = {W, H, M, iw, ih, y};
+  axisTitles(svg, f, cfg.v === "hf_current_dir" ? "Direction flowing towards (degrees)" : "Direction coming from (degrees)", season ? `Month (${yr})` : "Year");
   const w = dirWords(cfg);
   // east and west bands, the two ways the wind and sea mostly go through the Strait
   el("rect", {x:M.l, y:y(135), width:iw, height:y(45) - y(135), fill:"#EEF2F8"}, svg);
@@ -1812,7 +2316,7 @@ function drawDirection(svg, series, cfg){
   if (season){
     pts = series.data.filter(r => r[0].startsWith(yr)).map(r => [doyOf(r[0]), norm(r[1]), r[0]]);
     x = d => M.l + (d - 1) / 364 * iw;
-    [1,32,60,91,121,152,182,213,244,274,305,335].forEach((d, i) => el("text", {x:x(d+14), y:H-12, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = MONTHS[i]);
+    [1,32,60,91,121,152,182,213,244,274,305,335].forEach((d, i) => el("text", {x:x(d+14), y:M.t+ih+20, "text-anchor":"middle", fill:"#4F6873", "font-size":12}, svg).textContent = MONTHS[i]);
   } else {
     pts = series.data.map(r => [Date.parse(r[0] + "T00:00:00Z"), norm(r[1]), r[0]]);
     const t0 = pts.length ? pts[0][0] : 0, t1 = pts.length ? pts[pts.length-1][0] : 1;
@@ -1820,13 +2324,13 @@ function drawDirection(svg, series, cfg){
     const y0 = new Date(t0).getUTCFullYear(), y1 = new Date(t1).getUTCFullYear(), stepY = Math.max(1, Math.ceil((y1 - y0) / 10));
     for (let yy = y0 + (y0 % stepY ? stepY - y0 % stepY : 0); yy <= y1; yy += stepY){
       const t = Date.UTC(yy,0,1); if (t < t0) continue;
-      el("text", {x:x(t), y:H-12, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = yy;
+      el("text", {x:x(t), y:M.t+ih+20, "text-anchor":"middle", fill:"#6B7F87", "font-size":12}, svg).textContent = yy;
     }
   }
   const r = season ? 2.6 : 1.4, op = season ? 0.9 : Math.max(0.15, Math.min(0.6, 600 / (pts.length || 1)));
   pts.forEach(p => el("circle", {cx:x(p[0]).toFixed(1), cy:y(p[1]).toFixed(1), r, fill:"#0074A6", "fill-opacity":op}, svg));
   if (season && pts.length){ const lp = pts[pts.length-1]; el("circle", {cx:x(lp[0]), cy:y(lp[1]), r:4.5, fill:"#0074A6", stroke:"#fff", "stroke-width":2}, svg); }
-  legend([["wdot","",season ? `Daily direction, ${yr}` : "Daily direction"],["eband","","East (45–135°) and west (225–315°)"]]);
+  legend([["wdot","",season ? `Daily direction, ${yr}` : "Daily direction"],["eband","","East (45° to 135°) and west (225° to 315°)"]]);
   hover(svg, f, px => {
     if (!pts.length) return null;
     const target = season ? Math.round((px - M.l) / iw * 364) + 1 : pts[0][0] + (px - M.l) / iw * (pts[pts.length-1][0] - pts[0][0]);
@@ -1959,16 +2463,16 @@ function renderDust(){
   $("dust-summary").innerHTML = `
     <div class="panel"><div class="big num">${eps.length}</div><div class="k">dust episodes on record</div></div>
     <div class="panel"><div class="big num">${fmtShort(last.start)}</div><div class="k">most recent episode (${last.days} day${last.days>1?"s":""})</div></div>
-    <div class="panel"><div class="big num">${avg == null ? "–" : (avg > 0 ? "+" : "") + fmt(avg, 0) + "%"}</div><div class="k">average change in chlorophyll the week after${withChl.length ? `, higher after ${higher} of ${withChl.length}` : ""}</div></div>`;
+    <div class="panel"><div class="big num">${avg == null ? "n/a" : (avg > 0 ? "+" : "") + fmt(avg, 0) + "%"}</div><div class="k">average change in chlorophyll the week after${withChl.length ? `, higher after ${higher} of ${withChl.length}` : ""}</div></div>`;
   const cell = r => {
-    if (!r || r.change_pct == null) return `<td class="n"><span class="delta na">–</span></td>`;
+    if (!r || r.change_pct == null) return `<td class="n"><span class="delta na">n/a</span></td>`;
     const cls = r.change_pct > 0 ? "up" : "down";
     return `<td class="n"><span class="delta ${cls}">${r.change_pct > 0 ? "▲ +" : "▼ "}${fmt(r.change_pct, 0)}%</span></td>`;
   };
-  const peakText = p => p.dust_sfc != null ? `${fmt(p.dust_sfc,0)} µg/m³` : p.dust_aod_550 != null ? `AOD ${fmt(p.dust_aod_550,2)}` : p.aeronet_aod_500 != null ? `AOD ${fmt(p.aeronet_aod_500,2)}` : "–";
+  const peakText = p => p.dust_sfc != null ? `${fmt(p.dust_sfc,0)} µg/m³` : p.dust_aod_550 != null ? `AOD ${fmt(p.dust_aod_550,2)}` : p.aeronet_aod_500 != null ? `AOD ${fmt(p.aeronet_aod_500,2)}` : "n/a";
   const list = showAllDust ? eps : eps.slice(0, 8);
   rows.innerHTML = list.map(ep => `<tr>
-    <td>${ep.start === ep.end ? fmtDate(ep.start) : `${fmtShort(ep.start)} – ${fmtDate(ep.end)}`}</td>
+    <td>${ep.start === ep.end ? fmtDate(ep.start) : `${fmtShort(ep.start)} to ${fmtDate(ep.end)}`}</td>
     <td class="n">${ep.days}</td><td class="n">${peakText(ep.peak)}</td>
     ${cell(pick(ep,"chl"))}${cell(pick(ep,"kd490"))}${cell(pick(ep,"par"))}</tr>`).join("");
   $("dust-caption").textContent = `Change = average over the ${dust.response_window_days} days after the episode compared with the ${dust.response_window_days} days before. Satellite gaps under cloud mean some episodes have too few clear days to compare. A change after dust does not by itself prove the dust caused it.`;
@@ -1989,16 +2493,16 @@ function renderEvents(){
   const bYear = b ? b.events.filter(e => e.start.startsWith(yr)) : [];
   const withTrig = b ? b.events.filter(e => (e.triggers || []).length).length : 0;
   $("events-summary").innerHTML = `
-    <div class="panel"><div class="big num">${b ? bYear.length : "–"}</div><div class="k">blooms in ${areaName(state.area)} this year (${b ? b.events.length : 0} on record)</div></div>
-    <div class="panel"><div class="big num">${b && b.events.length ? fmt(withTrig / b.events.length * 100, 0) + "%" : "–"}</div><div class="k">of blooms followed upwelling, dust, heavy rain or a heatwave</div></div>
-    <div class="panel"><div class="big num">${u ? upYear.length : "–"}</div><div class="k">upwelling events this year (${u ? u.events.length : 0} on record)</div></div>
-    <div class="panel"><div class="big num">${avgCool == null ? "–" : signed(avgCool, 1) + " °C"}</div><div class="k">average change in Western Alboran sea temperature during upwelling</div></div>`;
+    <div class="panel"><div class="big num">${b ? bYear.length : "n/a"}</div><div class="k">blooms in ${areaName(state.area)} this year (${b ? b.events.length : 0} on record)</div></div>
+    <div class="panel"><div class="big num">${b && b.events.length ? fmt(withTrig / b.events.length * 100, 0) + "%" : "n/a"}</div><div class="k">of blooms followed upwelling, dust, heavy rain or a heatwave</div></div>
+    <div class="panel"><div class="big num">${u ? upYear.length : "n/a"}</div><div class="k">upwelling events this year (${u ? u.events.length : 0} on record)</div></div>
+    <div class="panel"><div class="big num">${avgCool == null ? "n/a" : signed(avgCool, 1) + " °C"}</div><div class="k">average change in Western Alboran sea temperature during upwelling</div></div>`;
   if (!b || !b.events.length){
     rows.innerHTML = `<tr><td colspan="5">No blooms detected for this area yet. They appear once several years of chlorophyll have built up.</td></tr>`;
     $("events-caption").textContent = ""; return;
   }
   rows.innerHTML = b.events.slice(-10).reverse().map(ev => `<tr>
-    <td>${ev.start === ev.end ? fmtDate(ev.start) : `${fmtShort(ev.start)} – ${fmtDate(ev.end)}`}</td>
+    <td>${ev.start === ev.end ? fmtDate(ev.start) : `${fmtShort(ev.start)} to ${fmtDate(ev.end)}`}</td>
     <td class="n">${ev.days}</td><td class="n">${fmt(ev.peak, 2)} mg/m³</td><td class="n">×${fmt(ev.peak_ratio, 1)}</td>
     <td>${triggerTags(ev) || '<span class="delta na">none found</span>'}</td></tr>`).join("");
   $("events-caption").textContent = `Latest 10 blooms for ${areaName(state.area)}. Clear-sky satellite days only; gaps of up to 3 cloudy days are bridged.`;
@@ -2020,7 +2524,7 @@ function renderWildlife(){
         return `<div class="cell num" style="background:${k<0?"transparent":shades[k]};color:${k>=3?"#fff":"var(--ink)"}" title="${esc(gname(g))}, ${v} records">${v || ""}</div>`;
       }).join("");
     }).join("");
-  $("wcal-note").textContent = `Records per month, ${wildlife.first.slice(0,4)}–${wildlife.last.slice(0,4)}`;
+  $("wcal-note").textContent = `Records per month, ${wildlife.first.slice(0,4)} to ${wildlife.last.slice(0,4)}`;
   const areaName2 = c => { const a = AREAS.find(x => x[0] === c); return a ? a[1] : (c || "Outside the mapped areas"); };
   $("wsight-rows").innerHTML = (wildlife.recent.list || []).slice(0, 12).map(r => `<tr>
     <td>${fmtDate(r.date)}</td><td>${esc(r.species)}</td><td>${esc(gname(r.group))}</td>
@@ -2152,52 +2656,515 @@ function downloadCSV(){
 }
 
 /* ---------------- boot ---------------- */
+const COMPARE_HTML = "    <div class=\"theme-head\">\n      <h1 id=\"compare-h\">Compare measurements</h1>\n      <p>Put two measurements and the events you care about on one timeline. Underneath, see how closely they move together and what tends to follow what.</p>\n    </div>\n    <div class=\"panel cmp-controls\">\n      <div class=\"cmp-line\"><span class=\"lbl\" id=\"cmp-q\">Start from a question</span><div class=\"cmp-presets\" role=\"group\" aria-labelledby=\"cmp-q\" id=\"cmp-presets\"></div></div>\n      <div class=\"cmp-fields\">\n        <label><span><i class=\"lk a\"></i>Line on the left axis</span><select id=\"cmp-a\"></select></label>\n        <label><span><i class=\"lk b\"></i>Line on the right axis</span><select id=\"cmp-b\"></select></label>\n        <label><span>Sea area</span><select id=\"cmp-area\"></select></label>\n        <div class=\"fld\"><span id=\"cmp-span-l\">Time span</span><div class=\"seg\" role=\"group\" aria-labelledby=\"cmp-span-l\" id=\"cmp-span\"></div></div>\n      </div>\n      <div class=\"cmp-line\"><span class=\"lbl\" id=\"cmp-ev-l\">Events underneath</span><div class=\"cmp-evs\" role=\"group\" aria-labelledby=\"cmp-ev-l\" id=\"cmp-evs\"></div>\n        <label class=\"chk\"><input type=\"checkbox\" id=\"cmp-anom\" checked> Remove the seasonal cycle for the analysis</label></div>\n    </div>\n    <figure class=\"panel cmp-chart\">\n      <figcaption class=\"chart-title\"><h2 id=\"cmp-title\">Chart</h2><span class=\"sub\" id=\"cmp-sub\"></span></figcaption>\n      <ul class=\"legend\" id=\"cmp-legend\"></ul>\n      <div class=\"chart-box\" id=\"cmp-box\"><svg id=\"cmp-svg\" viewBox=\"0 0 1100 420\" role=\"img\" aria-labelledby=\"cmp-title cmp-sub\"></svg><div class=\"tip\" id=\"cmp-tip\" hidden></div></div>\n    </figure>\n    <div class=\"cmp-analysis\" id=\"cmp-analysis\"></div>\n    <div class=\"actions\">\n      <p class=\"note\">A strong relationship is a lead to follow up, not proof of cause. Satellite readings have cloud gaps, and days without a value are left out of every calculation.</p>\n      <div class=\"btns\"><button type=\"button\" class=\"btn secondary\" id=\"cmp-link\">Copy link to this comparison</button><button type=\"button\" class=\"btn\" id=\"cmp-csv\">Download both series (CSV)</button></div>\n    </div>\n";
+/* ---------------- compare ---------------- */
+// Two measurements on their own axes, events in lanes underneath, and the statistics that go with
+// them: a regression on weekly values, a lead and lag check, and the average around events.
+const CMP_EVENTS = [
+  {key:"dust", lower:"Saharan dust", label:"Saharan dust", short:"Dust", color:"#D9A441", list:() => (dust && dust.episodes || []).map(e => [e.start, e.end])},
+  {key:"upwelling", lower:"upwelling", label:"Upwelling", short:"Upwelling", color:"#0F9D8A", list:() => (upwelling && upwelling.events || []).map(e => [e.start, e.end])},
+  {key:"heatwave", lower:"marine heatwaves", label:"Marine heatwave", short:"Heatwave", color:"#C0502E", list:() => ((mhw && mhw[state.area]) || {events:[]}).events.map(e => [e.start, e.end])},
+  {key:"rain", lower:"heavy rain", label:"Heavy rain", short:"Rain", color:"#2F6DB0", list:() => (rain && rain.events || []).map(e => [e.start, e.end])},
+  {key:"bloom", lower:"chlorophyll blooms", label:"Chlorophyll bloom", short:"Bloom", color:"#3F8F2A", list:() => ((blooms && blooms[state.area]) || {events:[]}).events.map(e => [e.start, e.end])},
+  {key:"sparkle", lower:"sea sparkle sightings", label:"Sea sparkle sightings", short:"Sea sparkle", color:"#7B5EA7", list:() => ((wildlife && wildlife.watch && wildlife.watch[0] && wildlife.watch[0].events) || []).map(e => [e.start, e.end || e.start])},
+];
+const CMP_PRESETS = [
+  {id:"sst-chl", label:"Does warm water mean less chlorophyll?", a:"sst", b:"chl", ev:[], on:null},
+  {id:"dust", label:"Does Saharan dust feed a bloom?", a:"chl", b:"", ev:["dust"], on:"dust"},
+  {id:"rain", label:"Does heavy rain cloud the water?", a:"kd490", b:"", ev:["rain"], on:"rain"},
+  {id:"upwelling", label:"What does upwelling do to the sea?", a:"sst", b:"chl", ev:["upwelling"], on:"upwelling"},
+];
+const CMP_SPANS = [["1y", "1 year", 365], ["2y", "2 years", 730], ["5y", "5 years", 1826], ["all", "Whole record", null]];
+const LOG_VARS = new Set(["chl","diatoms","dinoflagellates","haptophytes","cryptophytes","green_algae","prokaryotes","micro_phyto","nano_phyto","pico_phyto","pp_sat","cdom_adg443","bbp443"]);
+const cmp = {a:"sst", b:"chl", span:"2y", ev:new Set(), on:null, anom:true, preset:"sst-chl"};
+let cmpToken = 0, cmpData = null;
+
+function setupCompare(){
+  $("view-compare").innerHTML = COMPARE_HTML;
+  const vars = CHART_VARS.filter(c => !c.dir);
+  const opts = THEMES.map(t => {
+    const inT = vars.filter(c => themeOf(c) === t[0]);
+    return inT.length ? `<optgroup label="${esc(t[1])}">${inT.map(c => `<option value="${c.v}">${esc(c.title)}${c.model ? " (model)" : ""}${c.loc !== "area" && c.where ? `, ${esc(c.where)}` : ""}</option>`).join("")}</optgroup>` : "";
+  }).join("");
+  $("cmp-a").innerHTML = opts;
+  $("cmp-b").innerHTML = `<option value="">None</option>` + opts;
+  $("cmp-area").innerHTML = AREAS.map(([c, n]) => `<option value="${c}">${esc(n)}</option>`).join("");
+  $("cmp-span").innerHTML = CMP_SPANS.map(([id, lab]) => `<button type="button" data-span="${id}" aria-pressed="false">${lab}</button>`).join("");
+  $("cmp-presets").innerHTML = CMP_PRESETS.map(p => `<button type="button" data-preset="${p.id}" aria-pressed="false">${esc(p.label)}</button>`).join("");
+  $("cmp-evs").innerHTML = CMP_EVENTS.map(e => `<button type="button" data-ev="${e.key}" aria-pressed="false"><i style="background:${e.color}"></i>${esc(e.label)}</button>`).join("");
+  $("cmp-a").addEventListener("change", e => { cmp.a = e.target.value; cmp.preset = null; cmpGo(); });
+  $("cmp-b").addEventListener("change", e => { cmp.b = e.target.value; cmp.preset = null; cmpGo(); });
+  $("cmp-area").addEventListener("change", e => { setArea(e.target.value); });
+  $("cmp-span").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { cmp.span = b.dataset.span; cmpGo(); }));
+  $("cmp-presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    const p = CMP_PRESETS.find(x => x.id === b.dataset.preset);
+    Object.assign(cmp, {a:p.a, b:p.b, ev:new Set(p.ev), on:p.on, preset:p.id});
+    cmpGo();
+  }));
+  $("cmp-evs").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.ev;
+    if (cmp.ev.has(k)) cmp.ev.delete(k); else { cmp.ev.add(k); cmp.on = k; }
+    if (!cmp.ev.has(cmp.on)) cmp.on = [...cmp.ev][0] || null;
+    cmpGo();
+  }));
+  $("cmp-anom").addEventListener("change", e => { cmp.anom = e.target.checked; cmpGo(); });
+  $("cmp-link").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(location.href); $("cmp-link").textContent = "Link copied"; }
+    catch(e){ $("cmp-link").textContent = "Copy the address bar to share"; }
+    setTimeout(() => { $("cmp-link").textContent = "Copy link to this comparison"; }, 2500);
+  });
+  $("cmp-csv").addEventListener("click", cmpCSV);
+}
+function cmpQuery(){
+  const q = new URLSearchParams();
+  q.set("a", cmp.a); if (cmp.b) q.set("b", cmp.b);
+  q.set("area", state.area); q.set("span", cmp.span);
+  if (cmp.ev.size) q.set("ev", [...cmp.ev].join(","));
+  if (cmp.on) q.set("on", cmp.on);
+  if (!cmp.anom) q.set("raw", "1");
+  return "#compare?" + q.toString();
+}
+// change the address (so the view can be shared) and let the hash change redraw it
+function cmpGo(){
+  const h = cmpQuery();
+  if (location.hash !== h) location.hash = h; else renderCompare();
+}
+function compareFromQuery(q){
+  const ok = v => CHART_VARS.some(c => c.v === v && !c.dir);
+  if (q.has("a") && ok(q.get("a"))) cmp.a = q.get("a");
+  cmp.b = q.has("b") && ok(q.get("b")) ? q.get("b") : (q.has("a") ? "" : cmp.b);
+  if (q.has("span") && CMP_SPANS.some(s => s[0] === q.get("span"))) cmp.span = q.get("span");
+  if (q.has("ev") || q.has("a")) cmp.ev = new Set((q.get("ev") || "").split(",").filter(k => CMP_EVENTS.some(e => e.key === k)));
+  cmp.on = q.get("on") && cmp.ev.has(q.get("on")) ? q.get("on") : [...cmp.ev][0] || null;
+  cmp.anom = q.get("raw") !== "1";
+  const area = q.get("area");
+  if (area && AREAS.some(a => a[0] === area) && area !== state.area){ state.area = area; store.set("area", area); renderAreas(); }
+  const p = CMP_PRESETS.find(p => p.a === cmp.a && p.b === cmp.b && p.ev.join() === [...cmp.ev].join());
+  cmp.preset = p ? p.id : null;
+  renderCompare();
+}
+
+const dayMs = 864e5, toT = d => Date.parse(d + "T00:00:00Z"), toD = t => new Date(t).toISOString().slice(0, 10);
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+// two-sided p-value for Student's t (regularised incomplete beta, Numerical Recipes)
+function lgammaF(x){ const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5]; let y = x, t = x + 5.5; t -= (x + 0.5) * Math.log(t); let ser = 1.000000000190015; for (let j = 0; j < 6; j++) ser += c[j] / ++y; return -t + Math.log(2.5066282746310005 * ser / x); }
+function betacf(a, b, x){ const qab = a + b, qap = a + 1, qam = a - 1; let c = 1, d = 1 - qab * x / qap; if (Math.abs(d) < 1e-30) d = 1e-30; d = 1 / d; let h = d;
+  for (let m = 1; m <= 200; m++){ const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2)); d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30; c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2)); d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30; c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30; d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 3e-12) break; }
+  return h; }
+function ibeta(a, b, x){ if (x <= 0) return 0; if (x >= 1) return 1; const bt = Math.exp(lgammaF(a + b) - lgammaF(a) - lgammaF(b) + a * Math.log(x) + b * Math.log(1 - x)); return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b; }
+const pT = (t, df) => ibeta(df / 2, 0.5, df / (df + t * t));
+function tCrit(df){ let lo = 0, hi = 50; for (let i = 0; i < 60; i++){ const mid = (lo + hi) / 2; if (pT(mid, df) > 0.05) lo = mid; else hi = mid; } return (lo + hi) / 2; }
+const fmtP = p => !isFinite(p) ? "p not available" : p < 0.001 ? "p < 0.001" : `p = ${p < 0.01 ? p.toFixed(3) : p.toFixed(2)}`;
+function corr(a, b){ const ma = mean(a), mb = mean(b); let sab = 0, saa = 0, sbb = 0; for (let i = 0; i < a.length; i++){ sab += (a[i] - ma) * (b[i] - mb); saa += (a[i] - ma) ** 2; sbb += (b[i] - mb) ** 2; } return sab / Math.sqrt(saa * sbb); }
+function lag1(a){ const m = mean(a); let num = 0, den = 0; for (let i = 0; i < a.length; i++){ den += (a[i] - m) ** 2; if (i) num += (a[i] - m) * (a[i - 1] - m); } return den ? num / den : 0; }
+const sgnF = (v, dp) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(dp);
+
+// value used in the analysis: against normal (log ratio for skewed satellite values) or as measured
+function cmpVal(cfg, series, date, v, anom){
+  const lg = LOG_VARS.has(cfg.v);
+  if (lg && !(v > 0)) return null;
+  if (!anom) return lg ? Math.log10(v) : v;
+  const c = series.climatology; if (!c) return null;
+  const m = c.mean[doyOf(date) - 1]; if (m == null) return null;
+  if (lg) return m > 0 ? Math.log10(v / m) : null;
+  return v - m;
+}
+function axisLabelFor(cfg, series, anom){
+  const u = niceUnit(series.unit);
+  if (anom) return LOG_VARS.has(cfg.v) ? `${cfg.title} against normal (%)` : `${cfg.title} against normal (${u})`;
+  return `${cfg.title} (${u}${LOG_VARS.has(cfg.v) ? ", log scale" : ""})`;
+}
+
+async function renderCompare(){
+  const token = ++cmpToken;
+  // controls reflect the state
+  $("cmp-a").value = cmp.a; $("cmp-b").value = cmp.b; $("cmp-area").value = state.area; $("cmp-anom").checked = cmp.anom;
+  $("cmp-span").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.span === cmp.span)));
+  $("cmp-presets").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === cmp.preset)));
+  $("cmp-evs").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(cmp.ev.has(b.dataset.ev))));
+  const cfgA = CHART_VARS.find(c => c.v === cmp.a), cfgB = cmp.b ? CHART_VARS.find(c => c.v === cmp.b) : null;
+  const load = async cfg => { if (!cfg) return null; try { return (await getSeries(cfg, locFor(cfg))).series; } catch(e){ return null; } };
+  const [sA, sB] = await Promise.all([load(cfgA), load(cfgB)]);
+  if (token !== cmpToken) return;
+  $("cmp-title").textContent = cfgB ? `${cfgA.title} and ${cfgB.title.charAt(0).toLowerCase() + cfgB.title.slice(1)}` : cfgA.title;
+  if (!sA || !sA.data.length){
+    $("cmp-svg").innerHTML = `<text x="550" y="200" text-anchor="middle" fill="#4F6873" font-size="16">No data has been published for ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} in this area yet.</text>`;
+    $("cmp-analysis").innerHTML = ""; $("cmp-legend").innerHTML = ""; $("cmp-sub").textContent = ""; cmpData = null; return;
+  }
+  const lastT = Math.max(toT(sA.data[sA.data.length - 1][0]), sB && sB.data.length ? toT(sB.data[sB.data.length - 1][0]) : 0);
+  const firstT = Math.min(toT(sA.data[0][0]), sB && sB.data.length ? toT(sB.data[0][0]) : Infinity);
+  const span = CMP_SPANS.find(s => s[0] === cmp.span)[2];
+  const t0 = span ? Math.max(firstT, lastT - span * dayMs) : firstT, t1 = lastT;
+  const win = s => s ? s.data.filter(r => { const t = toT(r[0]); return t >= t0 && t <= t1; }) : [];
+  const rA = win(sA), rB = win(sB);
+  cmpData = {cfgA, cfgB, sA, sB, rA, rB, t0, t1};
+  $("cmp-sub").textContent = `${cfgA.loc === "area" || (cfgB && cfgB.loc === "area") ? areaName(state.area) + ", " : ""}${fmtDate(toD(t0))} to ${fmtDate(toD(t1))}`;
+  drawCompareChart();
+  renderCompareAnalysis();
+}
+
+function drawCompareChart(){
+  const {cfgA, cfgB, sA, sB, rA, rB, t0, t1} = cmpData;
+  const svg = $("cmp-svg"); svg.innerHTML = "";
+  const X0 = 86, X1 = 1000, YT = 22, YB = 300;
+  const X = t => X0 + (t - t0) / (t1 - t0 || 1) * (X1 - X0);
+  const scaleFor = (cfg, rows) => {
+    const vals = rows.map(r => r[1]).filter(v => isFinite(v) && (!LOG_VARS.has(cfg.v) || v > 0));
+    if (!vals.length) return null;
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (LOG_VARS.has(cfg.v)){
+      const L0 = Math.floor(Math.log10(lo) * 2) / 2, L1 = Math.ceil(Math.log10(hi) * 2) / 2 || L0 + 0.5;
+      const ticks = []; for (let e = Math.floor(L0); e <= Math.ceil(L1); e++) [1, 3].forEach(m => { const v = m * 10 ** e; if (Math.log10(v) >= L0 - 1e-9 && Math.log10(v) <= L1 + 1e-9) ticks.push(v); });
+      return {y: v => YB - (Math.log10(v) - L0) / (L1 - L0 || 1) * (YB - YT), ticks, log:true};
+    }
+    const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+    if (cfg.floor0) lo = Math.max(0, lo);
+    const nt = niceTicks(lo, hi, 5);
+    return {y: v => YB - (v - lo) / (hi - lo) * (YB - YT), ticks: nt.ticks.filter(v => v >= lo && v <= hi), log:false};
+  };
+  const scA = scaleFor(cfgA, rA), scB = cfgB && rB.length ? scaleFor(cfgB, rB) : null;
+  const active = CMP_EVENTS.filter(e => cmp.ev.has(e.key));
+  const laneY = j => YB + 34 + j * 24;
+  const H = laneY(active.length) + 46;
+  svg.setAttribute("viewBox", `0 0 1100 ${H}`);
+  const fmtTick = v => v >= 100 ? v.toLocaleString("en-GB", {maximumFractionDigits:0}) : String(+v.toPrecision(3));
+  // grid and axes
+  scA && scA.ticks.forEach(v => {
+    el("line", {x1:X0, x2:X1, y1:scA.y(v), y2:scA.y(v), stroke:"#E6EFEF"}, svg);
+    el("text", {x:X0 - 8, y:scA.y(v) + 4, "text-anchor":"end", fill:"#1F6F8B", "font-size":12, class:"num"}, svg).textContent = fmtTick(v);
+  });
+  el("text", {x:18, y:(YT + YB) / 2, transform:`rotate(-90 18 ${(YT + YB) / 2})`, "text-anchor":"middle", fill:"#1F6F8B", "font-size":13, "font-weight":700}, svg).textContent = axisLabelFor(cfgA, sA, false);
+  if (scB){
+    scB.ticks.forEach(v => el("text", {x:X1 + 8, y:scB.y(v) + 4, fill:"#A3461A", "font-size":12, class:"num"}, svg).textContent = fmtTick(v));
+    el("text", {x:1084, y:(YT + YB) / 2, transform:`rotate(90 1084 ${(YT + YB) / 2})`, "text-anchor":"middle", fill:"#A3461A", "font-size":13, "font-weight":700}, svg).textContent = axisLabelFor(cfgB, sB, false);
+  }
+  el("line", {x1:X0, x2:X1, y1:YB, y2:YB, stroke:"#9DB5B5"}, svg);
+  // time ticks: months for short spans, years for long ones
+  const years = (t1 - t0) / (365 * dayMs);
+  const d0 = new Date(t0);
+  if (years <= 2.2){
+    for (let d = new Date(Date.UTC(d0.getUTCFullYear(), Math.ceil(d0.getUTCMonth() / 3) * 3, 1)); d.getTime() <= t1; d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 3, 1))){
+      const x = X(d.getTime());
+      el("line", {x1:x, x2:x, y1:YB, y2:YB + 5, stroke:"#9DB5B5"}, svg);
+      el("text", {x, y:YB + 19, "text-anchor":"middle", fill:"#4F6873", "font-size":12}, svg).textContent = `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+    }
+  } else {
+    const step = Math.max(1, Math.ceil(years / 10));
+    for (let y = d0.getUTCFullYear() + 1; Date.UTC(y, 0, 1) <= t1; y += step){
+      const x = X(Date.UTC(y, 0, 1));
+      el("line", {x1:x, x2:x, y1:YB, y2:YB + 5, stroke:"#9DB5B5"}, svg);
+      el("text", {x, y:YB + 19, "text-anchor":"middle", fill:"#4F6873", "font-size":12}, svg).textContent = y;
+    }
+  }
+  el("text", {x:(X0 + X1) / 2, y:H - 8, "text-anchor":"middle", fill:"#2C4552", "font-size":13, "font-weight":700}, svg).textContent = "Date (daily values)";
+  // event lanes
+  active.forEach((e, j) => {
+    const y = laneY(j);
+    el("rect", {x:X0, y, width:X1 - X0, height:18, fill:"#F4F8F8"}, svg);
+    e.list().forEach(([a, b]) => {
+      const ta = toT(a), tb = toT(b || a) + dayMs;
+      if (tb < t0 || ta > t1) return;
+      el("rect", {x:X(Math.max(ta, t0)), y, width:Math.max(3, X(Math.min(tb, t1)) - X(Math.max(ta, t0))), height:18, fill:e.color}, svg);
+    });
+    el("text", {x:X0 - 8, y:y + 13, "text-anchor":"end", fill:"#2C4552", "font-size":12}, svg).textContent = e.short;
+  });
+  // the lines: dots and a 7-day average for gappy satellite data, a plain line otherwise
+  const drawSeries = (cfg, rows, sc, color) => {
+    if (!sc || !rows.length) return;
+    const sat = !!cfg.sat;
+    const pts = rows.filter(r => !LOG_VARS.has(cfg.v) || r[1] > 0).map(r => [toT(r[0]), r[1]]);
+    if (sat){
+      const step = Math.max(1, Math.round(pts.length / 900));
+      pts.forEach((p, i) => { if (i % step === 0) el("circle", {cx:X(p[0]).toFixed(1), cy:sc.y(p[1]).toFixed(1), r:1.6, fill:color, "fill-opacity":0.3}, svg); });
+      const sm = []; let q = [];
+      pts.forEach(p => { q.push(p); while (p[0] - q[0][0] > 6 * dayMs) q.shift(); const v = sc.log ? 10 ** mean(q.map(x => Math.log10(x[1]))) : mean(q.map(x => x[1])); sm.push([p[0], v]); });
+      el("path", {d:pathFrom(sm.map(p => [p[0] / dayMs, p[1]]), d => X(d * dayMs), sc.y, 8), fill:"none", stroke:color, "stroke-width":2.2, "stroke-linejoin":"round"}, svg);
+    } else {
+      el("path", {d:pathFrom(pts.map(p => [p[0] / dayMs, p[1]]), d => X(d * dayMs), sc.y, 3), fill:"none", stroke:color, "stroke-width":1.6, "stroke-linejoin":"round"}, svg);
+    }
+  };
+  drawSeries(cfgA, rA, scA, "#1F6F8B");
+  if (cfgB) drawSeries(cfgB, rB, scB, "#C2571A");
+  const leg = [["", "border-color:#1F6F8B", `${cfgA.title}${cfgA.sat ? ", 7-day average (dots are single days)" : ""}`]];
+  if (cfgB) leg.push(["", "border-color:#C2571A", `${cfgB.title}${cfgB.sat ? ", 7-day average (dots are single days)" : ""}`]);
+  active.forEach(e => leg.push(["", `height:10px;border:0;background:${e.color};width:14px`, e.label]));
+  $("cmp-legend").innerHTML = leg.map(([c, st, l]) => `<li><span class="key ${c}" style="${st}"></span>${esc(l)}</li>`).join("");
+  // hover
+  const mapA = new Map(rA.map(r => [r[0], r[1]])), mapB = new Map(rB.map(r => [r[0], r[1]]));
+  const tip = $("cmp-tip"), box = $("cmp-box");
+  const cross = el("line", {y1:YT, y2:laneY(active.length), stroke:"#0E3A53", "stroke-dasharray":"3 3", visibility:"hidden"}, svg);
+  svg.onmousemove = ev => {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    if (p.x < X0 || p.x > X1){ tip.hidden = true; cross.setAttribute("visibility", "hidden"); return; }
+    const t = t0 + (p.x - X0) / (X1 - X0) * (t1 - t0), d = toD(Math.round(t / dayMs) * dayMs);
+    cross.setAttribute("x1", X(toT(d))); cross.setAttribute("x2", X(toT(d))); cross.setAttribute("visibility", "visible");
+    const rows = [[cfgA.title, mapA.has(d) ? `${fmt(mapA.get(d), cfgA.dp)} ${niceUnit(sA.unit)}` : "no reading"]];
+    if (cfgB) rows.push([cfgB.title, mapB.has(d) ? `${fmt(mapB.get(d), cfgB.dp)} ${niceUnit(sB.unit)}` : "no reading"]);
+    active.forEach(e => { if (e.list().some(([a, b]) => d >= a && d <= (b || a))) rows.push(["", e.label]); });
+    tip.innerHTML = `<b>${fmtDate(d)}</b>` + rows.map(r => `<div class="row"><span>${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join("");
+    tip.hidden = false;
+    const bx = box.getBoundingClientRect();
+    let left = ev.clientX - bx.left + box.scrollLeft + 14;
+    if (left + 230 > box.clientWidth + box.scrollLeft) left -= 250;
+    tip.style.left = left + "px"; tip.style.top = Math.max(0, ev.clientY - bx.top - 10) + "px";
+  };
+  svg.onmouseleave = () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); };
+}
+
+function weekly(cfg, series, rows, t0, anom){
+  const wk = new Map();
+  rows.forEach(r => {
+    const v = cmpVal(cfg, series, r[0], r[1], anom); if (v == null || !isFinite(v)) return;
+    const w = Math.floor((toT(r[0]) - t0) / (7 * dayMs));
+    if (!wk.has(w)) wk.set(w, []); wk.get(w).push(v);
+  });
+  const out = new Map(); wk.forEach((vals, w) => { if (vals.length >= 2) out.set(w, mean(vals)); });
+  return out;
+}
+function renderCompareAnalysis(){
+  const {cfgA, cfgB, sA, sB, rA, rB, t0} = cmpData;
+  const panels = [];
+  if (cfgB && rB.length) panels.push(...pairPanels(cfgA, cfgB, sA, sB, rA, rB, t0));
+  if (cmp.on) panels.push(eventPanel(cfgA, sA, rA));
+  if (!panels.length) panels.push(`<div class="panel cmp-empty">Choose a second measurement to see how the two relate, or switch on an event type to see what ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} does around those events.</div>`);
+  $("cmp-analysis").innerHTML = panels.join("");
+  const sel = $("cmp-on");
+  if (sel) sel.addEventListener("change", e => { cmp.on = e.target.value; cmpGo(); });
+}
+
+// round percentages for a log-ratio axis (−75% … +900%)
+function pctTicks(lo, hi){
+  const c = [-90, -75, -50, -25, 0, 25, 50, 100, 200, 400, 900].map(p => Math.log10(1 + p / 100)).filter(v => v >= lo && v <= hi);
+  return c.length > 6 ? c.filter((_, i) => i % 2 === 0 || c[i] === 0) : c;
+}
+function valTicksLog(lo, hi){ const out = []; for (let e = Math.floor(lo); e <= Math.ceil(hi); e++) [1, 2, 5].forEach(m => { const v = Math.log10(m) + e; if (v >= lo && v <= hi) out.push(v); }); return out; }
+function pctTick(lr){ const p = Math.round((10 ** lr - 1) * 100); return (p > 0 ? "+" : p < 0 ? "−" : "") + Math.abs(p) + "%"; }
+function pairPanels(cfgA, cfgB, sA, sB, rA, rB, t0){
+  const anom = cmp.anom;
+  const wA = weekly(cfgA, sA, rA, t0, anom), wB = weekly(cfgB, sB, rB, t0, anom);
+  const weeks = [...wA.keys()].filter(w => wB.has(w)).sort((a, b) => a - b);
+  if (weeks.length < 8) return [`<div class="panel cmp-empty">Fewer than 8 weeks have readings of both ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} and ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} in this span, which is too few to say how they relate. Try a longer time span.</div>`];
+  const x = weeks.map(w => wA.get(w)), y = weeks.map(w => wB.get(w));
+  const n = x.length, mx = mean(x), my = mean(y);
+  let sxx = 0, sxy = 0; for (let i = 0; i < n; i++){ sxx += (x[i] - mx) ** 2; sxy += (x[i] - mx) * (y[i] - my); }
+  const b = sxy / sxx, a = my - b * mx;
+  let sse = 0; for (let i = 0; i < n; i++) sse += (y[i] - a - b * x[i]) ** 2;
+  const r = corr(x, y);
+  // neighbouring weeks are alike, so count fewer independent ones (Bretherton et al. 1999)
+  const r1 = Math.max(0, lag1(x)) * Math.max(0, lag1(y));
+  const nEff = Math.max(4, Math.min(n, Math.round(n * (1 - r1) / (1 + r1))));
+  const seB = Math.sqrt(sse / (nEff - 2) / sxx);
+  const t = r * Math.sqrt((nEff - 2) / (1 - r * r)), p = pT(Math.abs(t), nEff - 2), tc = tCrit(nEff - 2);
+  const lgA = LOG_VARS.has(cfgA.v), lgB = LOG_VARS.has(cfgB.v);
+  const uA = niceUnit(sA.unit), uB = niceUnit(sB.unit);
+  const xName = anom ? (lgA ? `log₁₀(${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} ÷ normal)` : `Δ${cfgA.short || cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} (${uA})`) : (lgA ? `log₁₀(${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())})` : `${cfgA.short || cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} (${uA})`);
+  const yName = anom ? (lgB ? `log₁₀(${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} ÷ normal)` : `Δ${cfgB.short || cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} (${uB})`) : (lgB ? `log₁₀(${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())})` : `${cfgB.short || cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} (${uB})`);
+  const dpB = lgB ? 3 : Math.max(2, cfgB.dp + 1);
+  const eq = `${yName} = ${sgnF(a, dpB)} ${b < 0 ? "−" : "+"} ${Math.abs(b).toPrecision(3)} × ${xName}`;
+  // the slope in words
+  let plain;
+  const more = v => v < 0 ? "lower" : "higher";
+  if (!lgA && lgB){ const pc = (10 ** b - 1) * 100; plain = `Each 1 ${uA} ${anom ? "above normal" : "higher"} in ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} goes with about ${Math.abs(Math.round(pc))}% ${pc < 0 ? "less" : "more"} ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())}.`; }
+  else if (lgA && !lgB) plain = `Each doubling of ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} goes with ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} about ${fmt(Math.abs(b * Math.log10(2)), cfgB.dp)} ${uB} ${more(b)}.`;
+  else if (lgA && lgB){ const pc = (2 ** b - 1) * 100; plain = `Each doubling of ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} goes with about ${Math.abs(Math.round(pc))}% ${pc < 0 ? "less" : "more"} ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())}.`; }
+  else plain = `Each 1 ${uA} ${anom ? "above normal" : "higher"} in ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} goes with ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} about ${fmt(Math.abs(b), cfgB.dp + 1)} ${uB} ${more(b)}.`;
+  // scatter
+  const W = 460, H = 340, L = 62, R = 446, T = 14, B = 276;
+  const ext = v => { const lo = Math.min(...v), hi = Math.max(...v), pad = (hi - lo) * 0.08 || 0.1; return [lo - pad, hi + pad]; };
+  const [xl, xh] = ext(x), [yl, yh] = ext(y);
+  const SX = v => L + (v - xl) / (xh - xl) * (R - L), SY = v => B - (v - yl) / (yh - yl) * (B - T);
+  const tickLab = (v, lg) => lg ? (anom ? pctTick(v) : fmtTickV(10 ** v)) : sgnF(v, Math.abs(v) < 10 ? 1 : 0).replace(/^−0(\.0)?$/, "0");
+  const tk = (lo, hi, lg) => lg ? (anom ? pctTicks(lo, hi) : valTicksLog(lo, hi)) : niceTicks(lo, hi, 5).ticks.filter(v => v >= lo && v <= hi);
+  const xt = tk(xl, xh, lgA), yt = tk(yl, yh, lgB);
+  const dots = weeks.map((w, i) => { const mo = new Date(t0 + (w * 7 + 3) * dayMs).getUTCMonth(); const cool = mo >= 11 || mo <= 4; return `<circle cx="${SX(x[i]).toFixed(1)}" cy="${SY(y[i]).toFixed(1)}" r="3.6" fill="${cool ? "#2F6DB0" : "#B9771E"}" fill-opacity="0.7"/>`; }).join("");
+  const xTitle = anom ? (lgA ? `${cfgA.title} against normal (%)` : `${cfgA.title} against normal (${uA})`) : `${cfgA.title} (${uA}${lgA ? ", log scale" : ""})`;
+  const yTitle = anom ? (lgB ? `${cfgB.title} against normal (%)` : `${cfgB.title} against normal (${uB})`) : `${cfgB.title} (${uB}${lgB ? ", log scale" : ""})`;
+  const scatter = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter plot of weekly ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} against ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))}, with the line of best fit">
+    <rect x="${L}" y="${T}" width="${R - L}" height="${B - T}" fill="#F7FAF9" stroke="#C9DAD9"/>
+    ${xt.map(v => `<line x1="${SX(v)}" x2="${SX(v)}" y1="${T}" y2="${B}" stroke="#E6EFEF"/><text x="${SX(v)}" y="${B + 16}" text-anchor="middle" font-size="12" fill="#4F6873">${tickLab(v, lgA)}</text>`).join("")}
+    ${yt.map(v => `<line x1="${L}" x2="${R}" y1="${SY(v)}" y2="${SY(v)}" stroke="#E6EFEF"/><text x="${L - 6}" y="${SY(v) + 4}" text-anchor="end" font-size="12" fill="#4F6873">${tickLab(v, lgB)}</text>`).join("")}
+    ${dots}
+    <clipPath id="sc-clip"><rect x="${L}" y="${T}" width="${R - L}" height="${B - T}"/></clipPath>
+    <path d="M${SX(xl)},${SY(a + b * xl)}L${SX(xh)},${SY(a + b * xh)}" stroke="#0E3A53" stroke-width="2" stroke-dasharray="6 4" clip-path="url(#sc-clip)"/>
+    <rect x="${R - 176}" y="${T + 6}" width="170" height="42" rx="3" fill="#fff" stroke="#C9DAD9"/>
+    <text x="${R - 168}" y="${T + 23}" font-size="12" font-weight="700" fill="#0E3A53">y = ${sgnF(a, 3)} ${b < 0 ? "−" : "+"} ${Math.abs(b).toPrecision(3)}x</text>
+    <text x="${R - 168}" y="${T + 40}" font-size="12" fill="#0E3A53">r² = ${(r * r).toFixed(2)}, ${fmtP(p)}</text>
+    <text x="${(L + R) / 2}" y="${H - 22}" text-anchor="middle" font-size="13" font-weight="700" fill="#2C4552">${esc(xTitle)}</text>
+    <text x="14" y="${(T + B) / 2}" transform="rotate(-90 14 ${(T + B) / 2})" text-anchor="middle" font-size="13" font-weight="700" fill="#2C4552">${esc(yTitle)}</text>
+  </svg>`;
+  const panel1 = `<div class="panel"><h3>How closely they move together</h3>
+    <p class="sub">Each dot is one week${anom ? ", with the seasonal cycle removed from both" : ""}. x is ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))}, y is ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))}.</p>
+    ${scatter}
+    <div class="keyrow"><span><i style="background:#2F6DB0"></i>December to May</span><span><i style="background:#B9771E"></i>June to November</span></div>
+    <dl>
+      <dt>Line of best fit</dt><dd>${esc(eq)}</dd>
+      <dt>In plain terms</dt><dd>${esc(plain)}</dd>
+      <dt>r and r²</dt><dd>r = ${sgnF(r, 2)}, r² = ${(r * r).toFixed(2)}. ${esc(cfgA.title)} accounts for ${Math.round(r * r * 100)}% of the week-to-week variation in ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))}.</dd>
+      <dt>Slope</dt><dd>${sgnF(b, 4)} ± ${seB.toPrecision(2)} (standard error), 95% interval ${sgnF(b - tc * seB, 4)} to ${sgnF(b + tc * seB, 4)}</dd>
+      <dt>p-value</dt><dd>${fmtP(p)}, from ${n} weeks counted as ${nEff} independent ones</dd>
+    </dl>
+    <p class="sub">Least-squares fit on weekly means. ${lgA || lgB ? "Satellite plankton and colour values are skewed, so they are compared on a log scale. " : ""}Neighbouring weeks are alike, so the p-value and interval use an effective sample size from the lag-1 autocorrelation of both series. Without that correction the result would look more certain than it is.</p>
+  </div>`;
+  // lead and lag, on daily values
+  const dA = new Map(), dB = new Map();
+  rA.forEach(rw => { const v = cmpVal(cfgA, sA, rw[0], rw[1], anom); if (v != null && isFinite(v)) dA.set(Math.round(toT(rw[0]) / dayMs), v); });
+  rB.forEach(rw => { const v = cmpVal(cfgB, sB, rw[0], rw[1], anom); if (v != null && isFinite(v)) dB.set(Math.round(toT(rw[0]) / dayMs), v); });
+  const lags = [];
+  for (let k = -30; k <= 30; k += 5){
+    const xa = [], yb = [];
+    dA.forEach((v, d) => { if (dB.has(d + k)){ xa.push(v); yb.push(dB.get(d + k)); } });
+    lags.push({k, r: xa.length > 20 ? corr(xa, yb) : NaN, n: xa.length});
+  }
+  const ok = lags.filter(l => isFinite(l.r));
+  const best = ok.reduce((m, l) => Math.abs(l.r) > Math.abs(m.r) ? l : m, ok[0] || {k:0, r:0});
+  const LW = 460, LH = 340, LL = 62, LR = 446, LT = 14, LB = 276;
+  const rMax = Math.max(0.5, Math.ceil(Math.max(...ok.map(l => Math.abs(l.r)), 0.1) * 4) / 4);
+  const LXp = k => LL + (k + 30) / 60 * (LR - LL), LYp = v => (LT + LB) / 2 - v / rMax * ((LB - LT) / 2);
+  const rTicks = [-rMax, -rMax / 2, 0, rMax / 2, rMax];
+  const lagSvg = `<svg viewBox="0 0 ${LW} ${LH}" role="img" aria-label="Bar chart of the correlation when ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} is shifted from 30 days earlier to 30 days later">
+    ${rTicks.map(v => `<line x1="${LL}" x2="${LR}" y1="${LYp(v)}" y2="${LYp(v)}" stroke="${v === 0 ? "#9DB5B5" : "#E6EFEF"}"/><text x="${LL - 6}" y="${LYp(v) + 4}" text-anchor="end" font-size="12" fill="#4F6873">${v === 0 ? "0" : sgnF(v, 2).replace(/^(\d)/, "+$1")}</text>`).join("")}
+    ${lags.map(l => isFinite(l.r) ? `<rect x="${LXp(l.k) - 10}" y="${Math.min(LYp(0), LYp(l.r))}" width="20" height="${Math.abs(LYp(l.r) - LYp(0))}" fill="${l.k === best.k ? "#0E3A53" : "#8DB3BE"}"/>` : "").join("")}
+    ${[-30, -20, -10, 0, 10, 20, 30].map(k => `<text x="${LXp(k)}" y="${LB + 16}" text-anchor="middle" font-size="12" fill="#4F6873">${k > 0 ? "+" : k < 0 ? "−" : ""}${Math.abs(k)}</text>`).join("")}
+    <text x="${(LL + LR) / 2}" y="${LH - 22}" text-anchor="middle" font-size="13" font-weight="700" fill="#2C4552">Lag (days): ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} after ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))}</text>
+    <text x="14" y="${(LT + LB) / 2}" transform="rotate(-90 14 ${(LT + LB) / 2})" text-anchor="middle" font-size="13" font-weight="700" fill="#2C4552">Correlation, r (no units)</text>
+  </svg>`;
+  const lagText = !ok.length ? "Not enough overlapping days to check." :
+    best.k > 0 ? `The link is strongest when ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} is taken about ${best.k} days after ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} (r = ${sgnF(best.r, 2)}). That fits ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} responding to ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())}, though it does not prove it.`
+    : best.k < 0 ? `The link is strongest when ${cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} leads ${cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase())} by about ${-best.k} days (r = ${sgnF(best.r, 2)}).`
+    : `The link is strongest on the same days (r = ${sgnF(best.r, 2)}), with no clear lead either way.`;
+  const panel2 = `<div class="panel"><h3>Does one lead the other?</h3>
+    <p class="sub">Correlation between daily values${anom ? " against normal" : ""} when ${esc(cfgB.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} is shifted up to 30 days earlier or later.</p>
+    ${lagSvg}<p style="margin:0;font-size:15px">${esc(lagText)}</p></div>`;
+  return [panel1, panel2];
+}
+function fmtTickV(v){ return v >= 100 ? v.toFixed(0) : String(+v.toPrecision(2)); }
+
+function eventPanel(cfgA, sA, rA){
+  const e = CMP_EVENTS.find(x => x.key === cmp.on);
+  const lg = LOG_VARS.has(cfgA.v), u = niceUnit(sA.unit);
+  const byDay = new Map();
+  sA.data.forEach(r => { const v = cmpVal(cfgA, sA, r[0], r[1], true); if (v != null && isFinite(v)) byDay.set(Math.round(toT(r[0]) / dayMs), v); });
+  const events = e.list().filter(([a]) => toT(a) >= cmpData.t0 && toT(a) <= cmpData.t1);
+  const K0 = -10, K1 = 20, curve = [];
+  for (let k = K0; k <= K1; k++){
+    const vals = events.map(([a]) => byDay.get(Math.round(toT(a) / dayMs) + k)).filter(v => v != null).sort((p, q) => p - q);
+    curve.push({k, n: vals.length, m: vals.length ? mean(vals) : null, lo: vals.length >= 3 ? vals[Math.floor(vals.length * 0.2)] : null, hi: vals.length >= 3 ? vals[Math.ceil(vals.length * 0.8) - 1] : null});
+  }
+  const diffs = [], rows = [];
+  events.forEach(([a]) => {
+    const d0 = Math.round(toT(a) / dayMs);
+    const bef = [], aft = [];
+    for (let k = -10; k <= -1; k++) if (byDay.has(d0 + k)) bef.push(byDay.get(d0 + k));
+    for (let k = 4; k <= 10; k++) if (byDay.has(d0 + k)) aft.push(byDay.get(d0 + k));
+    if (bef.length >= 3 && aft.length >= 3){ const d = mean(aft) - mean(bef); diffs.push(d); rows.push([a, d]); }
+  });
+  const sel = `<label class="sub">Line up on <select id="cmp-on">${CMP_EVENTS.filter(x => cmp.ev.has(x.key)).map(x => `<option value="${x.key}"${x.key === cmp.on ? " selected" : ""}>${esc(x.lower)}</option>`).join("")}</select></label>`;
+  if (events.length < 3 || curve.every(c => c.m == null))
+    return `<div class="panel"><h3>What ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} does around ${esc(e.lower)}</h3>${sel}<p class="sub">There are ${events.length} events of ${esc(e.lower)} in this span with ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} readings around them. At least 3 are needed; try a longer time span.</p></div>`;
+  const ms = curve.filter(c => c.m != null);
+  const vals = ms.map(c => c.m).concat(ms.filter(c => c.lo != null).flatMap(c => [c.lo, c.hi]));
+  let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals); const pad = (hi - lo) * 0.1 || 0.05; lo -= pad; hi += pad;
+  const W = 600, H = 330, L = 70, R = 586, T = 14, B = 262;
+  const CX = k => L + (k - K0) / (K1 - K0) * (R - L), CY = v => B - (v - lo) / (hi - lo) * (B - T);
+  const band = ms.filter(c => c.lo != null);
+  const bandPath = band.length > 1 ? "M" + band.map(c => `${CX(c.k).toFixed(1)},${CY(c.hi).toFixed(1)}`).join("L") + "L" + band.slice().reverse().map(c => `${CX(c.k).toFixed(1)},${CY(c.lo).toFixed(1)}`).join("L") + "Z" : "";
+  const line = "M" + ms.map(c => `${CX(c.k).toFixed(1)},${CY(c.m).toFixed(1)}`).join("L");
+  const yt = lg ? pctTicks(lo, hi) : niceTicks(lo, hi, 5).ticks.filter(v => v >= lo && v <= hi);
+  const lab = v => lg ? pctTick(v) : `${v > 0 ? "+" : v < 0 ? "−" : ""}${fmt(Math.abs(v), Math.max(1, cfgA.dp))}`;
+  const after = ms.filter(c => c.k >= 0);
+  const pk = (after.length ? after : ms).reduce((m, c) => Math.abs(c.m) > Math.abs(m.m) ? c : m);
+  const chart = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Average ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} against normal from 10 days before to 20 days after the start of each event">
+    ${yt.map(v => `<line x1="${L}" x2="${R}" y1="${CY(v)}" y2="${CY(v)}" stroke="${v === 0 ? "#9DB5B5" : "#E6EFEF"}" ${v === 0 ? 'stroke-dasharray="4 4"' : ""}/><text x="${L - 6}" y="${CY(v) + 4}" text-anchor="end" font-size="12" fill="#4F6873">${lab(v)}</text>`).join("")}
+    <rect x="${CX(0)}" y="${T}" width="${CX(1) - CX(0)}" height="${B - T}" fill="${e.color}" fill-opacity="0.25"/>
+    ${bandPath ? `<path d="${bandPath}" fill="#CFE3E6"/>` : ""}
+    <path d="${line}" fill="none" stroke="#1F6F8B" stroke-width="2.6"/>
+    <circle cx="${CX(pk.k)}" cy="${CY(pk.m)}" r="5" fill="#1F6F8B" stroke="#fff" stroke-width="2"/>
+    ${[-10, -5, 0, 5, 10, 15, 20].map(k => `<text x="${CX(k)}" y="${B + 16}" text-anchor="middle" font-size="12" fill="#4F6873">${k > 0 ? "+" : k < 0 ? "−" : ""}${Math.abs(k)}</text>`).join("")}
+    <text x="${(L + R) / 2}" y="${H - 22}" text-anchor="middle" font-size="13" font-weight="700" fill="#2C4552">Days from the start of the event (days)</text>
+    <text x="14" y="${(T + B) / 2}" transform="rotate(-90 14 ${(T + B) / 2})" text-anchor="middle" font-size="13" font-weight="700" fill="#2C4552">${esc(cfgA.title)} against normal (${lg ? "%" : esc(u)})</text>
+  </svg>`;
+  let stats = "";
+  if (diffs.length >= 3){
+    const dm = mean(diffs), sd = Math.sqrt(diffs.reduce((s, v) => s + (v - dm) ** 2, 0) / (diffs.length - 1));
+    const tt = sd ? dm / (sd / Math.sqrt(diffs.length)) : NaN, df = diffs.length - 1;
+    const change = lg ? `${pctTick(dm)} on average` : `${dm > 0 ? "+" : dm < 0 ? "−" : ""}${fmt(Math.abs(dm), Math.max(1, cfgA.dp))} ${u} on average`;
+    stats = `<dl>
+      <dt>Change</dt><dd>${change} (days 4 to 10 after the start, against the 10 days before)</dd>
+      <dt>Paired t-test</dt><dd>t = ${isFinite(tt) ? sgnF(tt, 2) : "n/a"}, ${df} degrees of freedom, ${fmtP(pT(Math.abs(tt), df))}</dd>
+      <dt>Events up</dt><dd>${diffs.filter(v => v > 0).length} of ${diffs.length}</dd></dl>`;
+  }
+  const latestRows = rows.slice(-6).reverse().map(([a, d]) => `<tr><td>${fmtDate(a)}</td><td class="n">${lg ? pctTick(d) : `${d > 0 ? "+" : d < 0 ? "−" : ""}${fmt(Math.abs(d), Math.max(1, cfgA.dp))} ${esc(u)}`}</td></tr>`).join("");
+  const peakTxt = lg ? pctTick(pk.m) : `${pk.m > 0 ? "+" : "−"}${fmt(Math.abs(pk.m), Math.max(1, cfgA.dp))} ${u}`;
+  return `<div class="panel" style="flex-basis:560px"><h3>What ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} does around ${esc(e.lower)}</h3>
+    ${sel}
+    <p class="sub">Every event in the span lined up on its first day (shaded). The line is the average against normal, the band the spread between events (20th to 80th percentile).</p>
+    ${chart}
+    <p style="margin:0;font-size:15px">Across ${events.length} events, ${esc(cfgA.title.replace(/^[A-Z](?=[a-z])/, c => c.toLowerCase()))} was furthest from normal ${pk.k} day${pk.k === 1 ? "" : "s"} after the start, at ${esc(peakTxt)}.</p>
+    ${stats}
+    ${latestRows ? `<div class="table-wrap"><table><caption class="note" style="caption-side:top;text-align:left;padding:8px 12px">Latest events: change from the 10 days before to days 4 to 10 after</caption><thead><tr><th scope="col">Event start</th><th scope="col" class="n">Change</th></tr></thead><tbody>${latestRows}</tbody></table></div>` : ""}
+  </div>`;
+}
+
+function cmpCSV(){
+  if (!cmpData) return;
+  const {cfgA, cfgB, rA, rB} = cmpData;
+  const m = new Map();
+  rA.forEach(r => m.set(r[0], [r[1], ""]));
+  rB.forEach(r => { const v = m.get(r[0]) || ["", ""]; v[1] = r[1]; m.set(r[0], v); });
+  const head = ["date", `${cfgA.v}`].concat(cfgB ? [cfgB.v] : []).join(",");
+  const lines = [...m.keys()].sort().map(d => [d, m.get(d)[0]].concat(cfgB ? [m.get(d)[1]] : []).join(","));
+  const blob = new Blob([head + "\n" + lines.join("\n") + "\n"], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `compare_${cfgA.v}${cfgB ? "_" + cfgB.v : ""}_${state.area}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
 async function boot(){
   if (SAMPLE) $("sample").hidden = false;
+  if (!THEMES.some(t => t[0] === state.theme)) state.theme = "temp";
   renderAreas();
+  $("area-select").addEventListener("change", e => setArea(e.target.value));
   const vs = $("var-select");
-  // the group has to be settled before the menu is built, because the menu is the group's
-  if (!GROUPS.some(g => g[0] === state.group)) state.group = "physical";
-  fillVariableMenu();
-  renderTabs();
-  vs.addEventListener("change", () => { state.variable = vs.value; store.set("variable", vs.value); document.querySelectorAll(".card").forEach(x => x.setAttribute("aria-current", String(x.dataset.var === vs.value))); renderChart(); });
+  vs.addEventListener("change", () => openChart(vs.value, false));
   $("year-select").addEventListener("change", e => { state.year = e.target.value; renderChart(); });
   $("source-select").addEventListener("change", e => {
     if (e.target.value) state.src[state.variable] = e.target.value; else delete state.src[state.variable];
     store.set("sources", JSON.stringify(state.src));
     state.year = null;
-    renderChart(); renderCards();
+    renderChart();
   });
   $("mode-season").addEventListener("click", () => { state.mode = "season"; $("mode-season").setAttribute("aria-pressed","true"); $("mode-record").setAttribute("aria-pressed","false"); renderChart(); });
   $("mode-record").addEventListener("click", () => { state.mode = "record"; $("mode-record").setAttribute("aria-pressed","true"); $("mode-season").setAttribute("aria-pressed","false"); renderChart(); });
   $("download").addEventListener("click", downloadCSV);
   $("dust-more").addEventListener("click", () => { showAllDust = !showAllDust; renderDust(); });
+  $("ladder-more").addEventListener("click", () => { showAllLadder = !showAllLadder; renderLadder(); });
   try {
     [meta, latest] = await Promise.all([getJSON("meta.json"), getJSON("latest.json")]);
     try { dust = await getJSON("dust_events.json"); } catch(e){ dust = null; }
     try { mhw = await getJSON("marine_heatwaves.json"); } catch(e){ mhw = null; }
     [upwelling, blooms, tides, wildlife, rain] = await Promise.all(["upwelling.json", "blooms.json", "tides.json", "wildlife.json", "rain.json"].map(f => getJSON(f).catch(() => null)));
   } catch(e){
-    $("cards").innerHTML = `<div class="error">The data files couldn't be loaded (${esc(e.message)}). They are published after each morning's harvest; please try again later.</div>`;
-    $("updated").textContent = "";
+    $("ladder").innerHTML = `<div class="error">The data files did not load (${esc(e.message)}). The harvester publishes them every morning, so please try again later.</div>`;
+    $("dateline").textContent = "";
     renderSources(); return;
   }
-  const newest = latest.map(l => l.date).sort().pop();
-  $("updated").innerHTML = newest ? `Latest data: <strong>${fmtDate(newest)}</strong> · updated every morning` : "";
   const dustToday = latest.find(l => l.variable === "dust_sfc" && l.location === "gibraltar_airport");
-  if (dustToday && dustToday.value > DUST_THRESHOLD){
+  if (dustToday && dustToday.value > DUST_THRESHOLD && staleDays(dustToday.date) <= 2){
     const a = $("dust-alert");
-    a.innerHTML = `<span aria-hidden="true">▲</span><div><strong>Saharan dust over Gibraltar.</strong> Modelled dust near the ground reached ${fmt(dustToday.value,0)} µg/m³ on ${fmtDate(dustToday.date)}, above our ${DUST_THRESHOLD} µg/m³ dust-day level. Watch the chlorophyll and light charts over the coming week.</div>`;
-    a.hidden = false;
+    a.innerHTML = `<span aria-hidden="true">▲</span><div><strong>Saharan dust over Gibraltar.</strong> Modelled dust near the ground reached ${fmt(dustToday.value,0)} µg/m³ on ${fmtDate(dustToday.date)}, above our dust-day level of ${DUST_THRESHOLD} µg/m³. Watch the chlorophyll and light charts over the next week.</div>`;
+    a.dataset.on = "1";
   }
   renderSources();
-  await Promise.all([renderCards(), renderChart()]);
   renderDust();
   renderEvents();
   renderWildlife();
   renderWatch();
   renderStrandings();
-  applySectionVisibility();
+  setupCompare();
+  window.addEventListener("hashchange", route);
+  await route();
 }
 boot();
 
