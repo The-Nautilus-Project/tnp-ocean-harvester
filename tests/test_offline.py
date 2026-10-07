@@ -1186,7 +1186,9 @@ class WildlifeTests(unittest.TestCase):
             probe.write_text(csv_text)
             wcfg["source"]["csv"] = "nemo/_test_export.csv"
             try:
-                n = export_wildlife(CONFIG, wcfg, {}, None, tmp, log=lambda *a: None)
+                # pinned to just after the records, so they stay inside the 30-day "recent" window
+                # whatever day the tests run on
+                n = export_wildlife(CONFIG, wcfg, {}, None, tmp, log=lambda *a: None, today=date(2026, 9, 10))
             finally:
                 probe.unlink()
             self.assertEqual(n, 7)
